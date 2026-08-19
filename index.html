@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratory Validation Suite - Database Edition</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eaeaea; color: #333; min-height: 100vh; padding: 20px; }
+.container { max-width: 1400px; margin: 0 auto; background: #fff; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #ccc; }
+.header { background: #f8f9fa; color: #333; padding: 20px; text-align: center; border-bottom: 3px solid #dee2e6; }
+.header h1 { font-size: 1.8em; margin-bottom: 5px; color: #212529; }
+.header p { font-size: 0.9em; color: #6c757d; }
+.report-info { background: #fff; padding: 15px 20px; border-bottom: 2px solid #dee2e6; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.report-info .form-group label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 700; }
+.report-info input, .report-info select { background: #f8f9fa; border: 1px solid #ced4da; color: #212529; font-weight: 600; padding: 6px; font-size: 12px; }
+.analyte-manager { grid-column: 1 / -1; background: #e9ecef; padding: 12px; border-radius: 4px; border: 2px solid #495057; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.analyte-manager .form-group { margin-bottom: 0; flex: 1; min-width: 150px; }
+.analyte-manager select { font-weight: 800; font-size: 14px; border: 2px solid #495057; background: #fff; }
+.nav-tabs { display: flex; background: #e9ecef; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
+.nav-tab { padding: 12px 16px; cursor: pointer; border: none; background: none; font-size: 12px; font-weight: 700; color: #6c757d; transition: all 0.2s; border-right: 1px solid #dee2e6; }
+.nav-tab:hover { background: #dee2e6; color: #212529; }
+.nav-tab.active { color: #fff; background: #495057; border-right: 1px solid #495057; }
+.content { padding: 20px; }
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.form-group { margin-bottom: 12px; }
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
+label { display: block; margin-bottom: 4px; font-weight: 700; color: #495057; font-size: 11px; text-transform: uppercase; }
+input, select, textarea { width: 100%; padding: 7px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; background: #fff; color: #212529; }
+input:focus, select:focus { outline: none; border-color: #495057; }
+.data-table { width: 100%; border-collapse: collapse; margin: 12px 0; background: #fff; border: 1px solid #dee2e6; font-size: 11px; }
+.data-table th { background: #e9ecef; color: #212529; padding: 8px; text-align: left; font-weight: 700; border: 1px solid #dee2e6; font-size: 10px; text-transform: uppercase; }
+.data-table td { padding: 6px; border: 1px solid #dee2e6; }
+.data-table tr:nth-child(even) { background: #f8f9fa; }
+.data-table input, .data-table select { width: 100%; padding: 4px; border: 1px solid #ced4da; border-radius: 2px; font-size: 11px; }
+.btn { padding: 8px 14px; border: none; border-radius: 3px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin: 3px; text-transform: uppercase; }
+.btn-primary { background: #495057; color: #fff; }
+.btn-primary:hover { background: #343a40; }
+.btn-success { background: #fff; color: #212529; border: 1px solid #495057; }
+.btn-success:hover { background: #495057; color: #fff; }
+.btn-secondary { background: #6c757d; color: #fff; }
+.btn-danger { background: #dc3545; color: #fff; }
+.btn-danger:hover { background: #c82333; }
+.btn-info { background: #17a2b8; color: #fff; }
+.btn-info:hover { background: #138496; }
+.btn-report { background: #28a745; color: #fff; border: 1px solid #1e7e34; }
+.btn-report:hover { background: #1e7e34; }
+.results-panel { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 15px; border: 1px solid #dee2e6; border-left: 4px solid #495057; }
+.results-compact-wrapper { display: flex; gap: 15px; margin-top: 12px; align-items: flex-start; }
+.results-chart-box { width: 35%; min-width: 180px; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 8px; }
+.results-chart-box canvas { width: 100% !important; height: 180px !important; }
+.results-text-box { width: 65%; display: flex; flex-direction: column; gap: 8px; }
+.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.result-card { background: #fff; padding: 8px; border-radius: 3px; border: 1px solid #dee2e6; text-align: center; }
+.result-card h4 { color: #6c757d; margin-bottom: 3px; font-size: 9px; text-transform: uppercase; font-weight: 700; }
+.result-value { font-size: 16px; font-weight: 800; color: #212529; }
+.pass { color: #155724; font-weight: bold; background: #d4edda; padding: 2px 6px; border-radius: 3px; display: inline-block; border: 1px solid #c3e6cb; font-size: 10px; }
+.fail { color: #721c24; font-weight: bold; background: #f8d7da; padding: 2px 6px; border-radius: 3px; display: inline-block; border: 1px solid #f5c6cb; font-size: 10px; }
+.info-box { background: #e9ecef; border-left: 3px solid #495057; padding: 12px; margin: 12px 0; border-radius: 0 3px 3px 0; font-size: 11px; line-height: 1.5; color: #495057; }
+.info-box ol { margin-left: 20px; margin-top: 5px; font-size: 11px; line-height: 1.6; color: #495057; }
+.info-box ol li { margin-bottom: 4px; }
+.info-box strong { color: #212529; }
+.info-box code { background: #dee2e6; padding: 1px 4px; border-radius: 2px; font-family: monospace; font-size: 10px; color: #212529; }
+.hidden { display: none; }
+.recommendation-box { padding: 10px; background: #fff; border: 1px solid #dee2e6; border-radius: 3px; }
+.recommendation-box label { font-size: 10px; color: #6c757d; margin-bottom: 4px; display: block; font-weight: 700; }
+.recommendation-box textarea { height: 60px; resize: vertical; font-size: 11px; font-family: inherit; background: #f8f9fa; border: 1px solid #ced4da; width: 100%; }
+.footer { text-align: center; padding: 12px; color: #6c757d; font-weight: 600; font-size: 10px; border-top: 1px solid #dee2e6; background: #f8f9fa; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #dee2e6; }
+.section-header h2 { margin: 0; }
+</style>
+</head>
+<body>
+<div class="container" id="main-container">
+<div class="header" id="print-header">
+<h1>🔬 LABORATORY VALIDATION SUITE</h1>
+<p>Comprehensive Method Validation & Verification System</p>
+<p style="margin-top: 5px; font-size: 0.8em; font-weight: bold; color: #495057;">Created by: Lab SP.Mohammed al Desoqy</p>
+<div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+<button class="btn btn-success" onclick="exportToExcel()"> Export Complete Data to Excel</button>
+<button class="btn btn-primary" onclick="document.getElementById('import-excel-file').click()">📤 Import Complete Data from Excel</button>
+<button class="btn btn-info" onclick="document.getElementById('pdf-merge-input').click()">📄 Merge PDFs</button>
+<input type="file" id="pdf-merge-input" accept=".pdf" multiple style="display: none;" onchange="mergePDFs(this)">
+<input type="file" id="import-excel-file" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(this)">
+</div>
+</div>
+<div class="report-info">
+<div class="analyte-manager">
+<div class="form-group">
+<label>🔑 Select Analyte (Primary Key)</label>
+<select id="analyte-selector" onchange="switchAnalyte(this.value)"></select>
+</div>
+<div class="form-group">
+<label>Add New Analyte</label>
+<input type="text" id="new-analyte-input" placeholder="e.g., Hemoglobin">
+</div>
+<button class="btn btn-primary" onclick="addNewAnalyte()" style="margin-bottom: 0; height: 32px;">+ Add</button>
+<button class="btn btn-danger" onclick="removeCurrentAnalyte()" style="margin-bottom: 0; height: 32px;">Remove Current</button>
+</div>
+<div class="form-group"><label>Hospital / Facility</label><input type="text" id="global-hospital" oninput="autoSave()"></div>
+<div class="form-group"><label>Department</label><input type="text" id="global-department" oninput="autoSave()"></div>
+<div class="form-group"><label>Performed By</label><input type="text" id="global-performed" oninput="autoSave()"></div>
+<div class="form-group"><label>Reviewed By</label><input type="text" id="global-reviewed" oninput="autoSave()"></div>
+<div class="form-group"><label>Date</label><input type="date" id="global-date" oninput="autoSave()"></div>
+</div>
+<div class="nav-tabs">
+<button class="nav-tab active" onclick="showSection('precision')">📊 Precision</button>
+<button class="nav-tab" onclick="showSection('comparison-qual')"> Qual. Comp</button>
+<button class="nav-tab" onclick="showSection('comparison-quant')"> Quant. Comp</button>
+<button class="nav-tab" onclick="showSection('correlation')"> Correlation</button>
+<button class="nav-tab" onclick="showSection('cutoff')">✂️ Cut Off</button>
+<button class="nav-tab" onclick="showSection('linearity')">📏 Linearity</button>
+<button class="nav-tab" onclick="showSection('carryover')">💧 Carry Over</button>
+<button class="nav-tab" onclick="showSection('ref-intervals')">📏 Ref. Intervals</button>
+</div>
+<div class="content">
+<!-- Precision -->
+<div id="precision" class="section active">
+<div class="section-header">
+<h2>Simple Precision Study</h2>
+<button class="btn btn-report" onclick="generateTabReport('precision')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP05-A3: Simple Precision Study</strong><br>
+<strong>Why we do this:</strong> To ensure the method produces consistent, reliable results when the same sample is measured repeatedly under specified conditions (repeatability and within-lab precision).<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Select two or three levels of control material (e.g., Level 1: Normal, Level 2: Abnormal, Level 3: High/Pathological).</li>
+<li>Run each level at least 20 times (e.g., 2 runs/day for 10 days) as per your lab's policy.</li>
+<li>Enter the Date and Level results into the table below.</li>
+<li>Enter the acceptable %CV limits for each level (based on manufacturer claims or biological variation).</li>
+<li>Click <strong>"Force Calculate"</strong> to evaluate if the calculated %CV is within acceptable limits.</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>Mean = Σx/n</code> | <code>SD = (Σ(x-x̄)²/(n-1))</code> | <code>%CV = (SD/Mean)×100</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Instrument</label><input type="text" id="prec-instrument" oninput="autoSave()"></div>
+<div class="form-group"><label>Number of Levels</label><select id="prec-levels" onchange="updatePrecisionLevels(); autoSave()"><option value="2">2 Levels</option><option value="3">3 Levels</option></select></div>
+<div class="form-group"><label>Accept L1 (%CV)</label><input type="number" id="prec-accept-l1" step="0.1" oninput="autoSave(); calculatePrecision()"></div>
+<div class="form-group"><label>Accept L2 (%CV)</label><input type="number" id="prec-accept-l2" step="0.1" oninput="autoSave(); calculatePrecision()"></div>
+<div class="form-group hidden" id="prec-l3-group"><label>Accept L3 (%CV)</label><input type="number" id="prec-accept-l3" step="0.1" oninput="autoSave(); calculatePrecision()"></div>
+</div>
+<table class="data-table"><thead><tr><th>Run</th><th>Date</th><th>Level 1</th><th>Level 2</th><th class="hidden" id="th-l3">Level 3</th><th>Action</th></tr></thead><tbody id="precision-table"></tbody></table>
+<button class="btn btn-primary" onclick="addPrecisionRow()">+ Add Row</button>
+<button class="btn btn-success" onclick="calculatePrecision()">Force Calculate</button>
+<div id="precision-results" class="results-panel hidden">
+<h3>Results & Evaluation</h3>
+<div class="results-grid">
+<div class="result-card"><h4>L1 Mean</h4><div class="result-value" id="prec-l1-mean">-</div></div>
+<div class="result-card"><h4>L1 %CV</h4><div class="result-value" id="prec-l1-cv">-</div></div>
+<div class="result-card"><h4>L1 Status</h4><div class="result-value" id="prec-l1-status">-</div></div>
+<div class="result-card"><h4>L2 Mean</h4><div class="result-value" id="prec-l2-mean">-</div></div>
+<div class="result-card"><h4>L2 %CV</h4><div class="result-value" id="prec-l2-cv">-</div></div>
+<div class="result-card"><h4>L2 Status</h4><div class="result-value" id="prec-l2-status">-</div></div>
+<div class="result-card hidden" id="res-l3-mean-card"><h4>L3 Mean</h4><div class="result-value" id="prec-l3-mean">-</div></div>
+<div class="result-card hidden" id="res-l3-cv-card"><h4>L3 %CV</h4><div class="result-value" id="prec-l3-cv">-</div></div>
+<div class="result-card hidden" id="res-l3-status-card"><h4>L3 Status</h4><div class="result-value" id="prec-l3-status">-</div></div>
+</div>
+<div class="results-compact-wrapper">
+<div class="results-chart-box"><canvas id="precChart"></canvas></div>
+<div class="results-text-box"><div class="recommendation-box"><label>Conclusion & Recommendation:</label><textarea id="prec-recommendation" readonly></textarea></div></div>
+</div>
+</div>
+</div>
+<!-- Qualitative Comparison -->
+<div id="comparison-qual" class="section">
+<div class="section-header">
+<h2>Two Instrument Comparison (Qualitative)</h2>
+<button class="btn btn-report" onclick="generateTabReport('comparison-qual')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP12-A2: Two Instrument Comparison (Qualitative)</strong><br>
+<strong>Why we do this:</strong> To verify that a new qualitative method agrees with the established reference method in correctly classifying samples as Reactive (Positive) or Non-Reactive (Negative), minimizing false results.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Select at least 20-40 patient samples, ensuring a mix of Reactive and Non-Reactive results (include weak positives near the cutoff).</li>
+<li>Test each sample with both the Reference Method (A) and the new Test Method (B).</li>
+<li>Enter the Sample ID and select the results (REACTIVE / NON-REACTIVE) for both methods in the table.</li>
+<li>The system will automatically flag any discrepant results in red.</li>
+<li>Click <strong>"Force Calculate"</strong> to determine Sensitivity, Specificity, and overall agreement (target ≥95%).</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>Sensitivity = TP/(TP+FN)×100</code> | <code>Specificity = TN/(TN+FP)×100</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Reference (A)</label><input type="text" id="qual-ref" oninput="autoSave()"></div>
+<div class="form-group"><label>Test (B)</label><input type="text" id="qual-comp" oninput="autoSave()"></div>
+</div>
+<table class="data-table"><thead><tr><th>n</th><th>Sample ID</th><th>Method A</th><th>Method B</th><th>Discrepant</th><th>Action</th></tr></thead><tbody id="qual-table"></tbody></table>
+<button class="btn btn-primary" onclick="addQualRow()">+ Add Sample</button>
+<button class="btn btn-success" onclick="calculateQual()">Force Calculate</button>
+<div id="qual-results" class="results-panel hidden">
+<h3>Evaluation Summary</h3>
+<div class="results-grid">
+<div class="result-card"><h4>Sensitivity</h4><div class="result-value" id="qual-sens">-</div></div>
+<div class="result-card"><h4>Specificity</h4><div class="result-value" id="qual-spec">-</div></div>
+<div class="result-card"><h4>Total</h4><div class="result-value" id="qual-total">-</div></div>
+</div>
+<div class="results-compact-wrapper">
+<div class="results-chart-box"><canvas id="qualChart"></canvas></div>
+<div class="results-text-box"><div class="recommendation-box"><label>Conclusion & Recommendation:</label><textarea id="qual-recommendation" readonly></textarea></div></div>
+</div>
+</div>
+</div>
+<!-- Quantitative Comparison -->
+<div id="comparison-quant" class="section">
+<div class="section-header">
+<h2>Two Instrument Comparison (Quantitative)</h2>
+<button class="btn btn-report" onclick="generateTabReport('comparison-quant')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP09-A3: Two Instrument Comparison (Quantitative)</strong><br>
+<strong>Why we do this:</strong> To estimate the systematic bias between a new test method and a reference/comparator method, ensuring the new method's numerical results are clinically equivalent and safe for patient care.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Select at least 20-40 patient samples covering the entire reportable range (low, normal, and high concentrations).</li>
+<li>Analyze each sample on both the Reference Method (A) and the Test Method (B) within 2 hours to avoid sample stability issues.</li>
+<li>Enter the Sample ID and the numerical results for both methods in the table.</li>
+<li>Define the Total Allowable Error (TEa %) based on CLIA, RiliBÄK, or biological variation guidelines.</li>
+<li>Click <strong>"Force Calculate"</strong> to evaluate %Bias per sample and regression statistics. (Acceptable if ≤25% of samples exceed TEa, or per local policy).</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>%Bias = |(B-A)/A|×100</code> | <code>Regression: y = mx + b</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>TEa (%)</label><input type="number" id="quant-tea" value="10" step="0.1" oninput="autoSave(); calculateQuant()"></div>
+</div>
+<table class="data-table"><thead><tr><th>n</th><th>Sample ID</th><th>Method A</th><th>Method B</th><th>%Bias</th><th>Pass?</th><th>Action</th></tr></thead><tbody id="quant-table"></tbody></table>
+<button class="btn btn-primary" onclick="addQuantRow()">+ Add Sample</button>
+<button class="btn btn-success" onclick="calculateQuant()">Force Calculate</button>
+<div id="quant-results" class="results-panel hidden">
+<h3>Evaluation Summary</h3>
+<div class="results-grid">
+<div class="result-card"><h4>Acceptable</h4><div class="result-value pass" id="quant-acc">-</div></div>
+<div class="result-card"><h4>Unacceptable</h4><div class="result-value fail" id="quant-unacc">-</div></div>
+<div class="result-card"><h4>Mean Bias</h4><div class="result-value" id="quant-mean-bias">-</div></div>
+<div class="result-card"><h4>Slope (m)</h4><div class="result-value" id="quant-slope">-</div></div>
+</div>
+<div class="results-compact-wrapper">
+<div class="results-chart-box"><canvas id="quantScatterChart"></canvas></div>
+<div class="results-text-box"><div class="recommendation-box"><label>Conclusion & Recommendation:</label><textarea id="quant-recommendation" readonly></textarea></div></div>
+</div>
+</div>
+</div>
+<!-- Correlation -->
+<div id="correlation" class="section">
+<div class="section-header">
+<h2>Two Instrument Correlation Study</h2>
+<button class="btn btn-report" onclick="generateTabReport('correlation')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP09-A3: Two Instrument Correlation Study</strong><br>
+<strong>Why we do this:</strong> To establish the strength of the linear relationship between two quantitative methods. A high correlation indicates the methods track each other well across the entire measuring range.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Use the same dataset generated for the Quantitative Comparison (20-40 samples across the measuring range).</li>
+<li>Ensure the Sample IDs and results for Method A and Method B are accurately entered.</li>
+<li>Click <strong>"Force Calculate"</strong> to generate the Ordinary Least Squares regression equation (y = mx + b), Correlation Coefficient (r), and R².</li>
+<li>Verify that the correlation coefficient (r) is ≥ 0.95 (or 0.975), the slope is close to 1.0, and the intercept is close to 0.</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>r = |Σ((x-x̄)(y-ȳ)) / √(Σ(x-x)² Σ(y-ȳ)²)|</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Reference (A)</label><input type="text" id="corr-ref" oninput="autoSave()"></div>
+<div class="form-group"><label>Test (B)</label><input type="text" id="corr-comp" oninput="autoSave()"></div>
+</div>
+<table class="data-table"><thead><tr><th>n</th><th>Sample ID</th><th>Method A</th><th>Method B</th><th>Action</th></tr></thead><tbody id="corr-table"></tbody></table>
+<button class="btn btn-primary" onclick="addCorrRow()">+ Add Sample</button>
+<button class="btn btn-success" onclick="calculateCorr()">Force Calculate</button>
+<div id="corr-results" class="results-panel hidden">
+<h3>Statistical Analysis</h3>
+<div class="results-grid">
+<div class="result-card"><h4>Slope (m)</h4><div class="result-value" id="corr-slope">-</div></div>
+<div class="result-card"><h4>Intercept (b)</h4><div class="result-value" id="corr-int">-</div></div>
+<div class="result-card"><h4>Correlation (r)</h4><div class="result-value" id="corr-r">-</div></div>
+<div class="result-card"><h4>R²</h4><div class="result-value" id="corr-r2">-</div></div>
+</div>
+<div class="results-compact-wrapper">
+<div class="results-chart-box"><canvas id="corrChart"></canvas></div>
+<div class="results-text-box"><div class="recommendation-box"><label>Conclusion & Recommendation:</label><textarea id="corr-recommendation" readonly></textarea></div></div>
+</div>
+</div>
+</div>
+<!-- Cut Off -->
+<div id="cutoff" class="section">
+<div class="section-header">
+<h2>Cut Off Verification Report</h2>
+<button class="btn btn-report" onclick="generateTabReport('cutoff')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP12-A2: Cut Off Verification Report</strong><br>
+<strong>Why we do this:</strong> To confirm that the assay correctly classifies samples near the decision threshold (cut-off value). This is critical for qualitative or semi-quantitative tests to avoid false positives or false negatives in clinical decision-making.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Obtain samples with concentrations approximately 20% below and 20% above the manufacturer's stated cut-off value.</li>
+<li>Run at least 5 replicates for the "Lower" sample and 5 replicates for the "Higher" sample.</li>
+<li>Enter the official Cut Off Value and the Acceptance Criteria (e.g., 95% or 100% agreement).</li>
+<li>Enter the measured results for each replicate in the respective Sample 1 and Sample 2 tables.</li>
+<li>Click <strong>"Force Calculate"</strong> to verify if the percentage of correctly classified results meets the acceptance criteria.</li>
+</ol>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Cut Off Value</label><input type="number" id="co-value" step="0.01" oninput="autoSave(); updateCutOffTables(); calculateCutOff()"></div>
+<div class="form-group"><label>Acceptance (%)</label><input type="number" id="co-criteria" value="95" step="1" oninput="autoSave(); calculateCutOff()"></div>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+<div>
+<h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 4px; font-size: 13px;">Sample 1: ~20% Lower</h3>
+<table class="data-table"><thead><tr><th>Rep</th><th>Result</th><th>Expected</th><th>Discrepant</th><th>Action</th></tr></thead><tbody id="co-table-1"></tbody></table>
+</div>
+<div>
+<h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 4px; font-size: 13px;">Sample 2: ~20% Higher</h3>
+<table class="data-table"><thead><tr><th>Rep</th><th>Result</th><th>Expected</th><th>Discrepant</th><th>Action</th></tr></thead><tbody id="co-table-2"></tbody></table>
+</div>
+</div>
+<button class="btn btn-primary" onclick="addCutOffRows()">+ Add 5 Replicates</button>
+<button class="btn btn-success" onclick="calculateCutOff()">Force Calculate</button>
+<div id="co-results" class="results-panel hidden">
+<h3>Evaluation Summary</h3>
+<div class="results-grid">
+<div class="result-card"><h4>Sample 1 %</h4><div class="result-value" id="co-ach1">-</div></div>
+<div class="result-card"><h4>Sample 1 Status</h4><div class="result-value" id="co-stat1">-</div></div>
+<div class="result-card"><h4>Sample 2 %</h4><div class="result-value" id="co-ach2">-</div></div>
+<div class="result-card"><h4>Sample 2 Status</h4><div class="result-value" id="co-stat2">-</div></div>
+</div>
+<div class="recommendation-box" style="margin-top:12px;"><label>Conclusion & Recommendation:</label><textarea id="co-recommendation" readonly></textarea></div>
+</div>
+</div>
+<!-- Linearity -->
+<div id="linearity" class="section">
+<div class="section-header">
+<h2>Linearity Verification Report</h2>
+<button class="btn btn-report" onclick="generateTabReport('linearity')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP06-A: Linearity Verification Report</strong><br>
+<strong>Why we do this:</strong> To verify that the method provides results that are directly proportional to the concentration of the analyte in the sample across the entire claimed reportable range.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Prepare at least 4-5 samples with known target concentrations spanning the reportable range (e.g., Low, Mid-Low, Mid, Mid-High, High).</li>
+<li>Run each sample in duplicate (Run 1 and Run 2) in a single analytical run.</li>
+<li>Enter the Target concentration and the two run results for each sample level in the table.</li>
+<li>Enter the TEa (%) limit allowed for linearity evaluation.</li>
+<li>Click <strong>"Force Calculate"</strong>. The system will plot the regression line and calculate the % Deviation. The method is linear if the maximum % Deviation is ≤ TEa.</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>Expected = (Slope × Target) + Intercept</code> | <code>%Dev = |(Mean - Exp) / Target| × 100</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Instrument</label><input type="text" id="lin-instrument" oninput="autoSave()"></div>
+<div class="form-group"><label>TEa (%)</label><input type="number" id="lin-tea" value="10" step="0.1" oninput="autoSave(); calculateLinearity()"></div>
+</div>
+<table class="data-table"><thead><tr><th>Sample</th><th>Target</th><th>Run 1</th><th>Run 2</th><th>Mean</th><th>Expected</th><th>Dev.</th><th>% Dev.</th><th>Eval</th><th>Action</th></tr></thead><tbody id="lin-table"></tbody></table>
+<button class="btn btn-primary" onclick="addLinearityRow()">+ Add Sample Level</button>
+<button class="btn btn-success" onclick="calculateLinearity()">Force Calculate</button>
+<div id="lin-results" class="results-panel hidden">
+<h3>Linearity Evaluation</h3>
+<div class="results-grid">
+<div class="result-card"><h4>Max Dev %</h4><div class="result-value" id="lin-maxdev">-</div></div>
+<div class="result-card"><h4>TEa Limit</h4><div class="result-value" id="lin-tea-disp">-</div></div>
+<div class="result-card"><h4>Final Status</h4><div class="result-value" id="lin-status">-</div></div>
+</div>
+<div class="results-compact-wrapper">
+<div class="results-chart-box"><canvas id="linChart"></canvas></div>
+<div class="results-text-box"><div class="recommendation-box"><label>Conclusion & Recommendation:</label><textarea id="lin-recommendation" readonly></textarea></div></div>
+</div>
+</div>
+</div>
+<!-- Carry Over -->
+<div id="carryover" class="section">
+<div class="section-header">
+<h2>Carry Over Verification Report</h2>
+<button class="btn btn-report" onclick="generateTabReport('carryover')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP10-A3: Carry Over Verification Report</strong><br>
+<strong>Why we do this:</strong> To evaluate potential contamination of subsequent samples by residual material from a previous high-concentration sample, which could cause false elevations in low-concentration samples.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Follow the standard CLSI sequence: 3 Low samples (Baseline), followed by 3 High samples, then 10 Low samples (Post-High), interspersed with High samples as defined in the pre-loaded sequence.</li>
+<li>Enter the known Low Target and High Target concentrations.</li>
+<li>Enter the Accept Criteria (%) for carryover (e.g., ≤ 1.0%).</li>
+<li>Enter the measured results for each step in the sequence exactly as they appear on the analyzer.</li>
+<li>Click <strong>"Force Calculate"</strong>. The system calculates the carryover percentage. It passes if the calculated carryover is ≤ the accept criteria.</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>Carryover (%) = |(Mean Post-High - Mean Baseline) / (High Mean - Baseline Mean)| × 100</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Instrument</label><input type="text" id="car-instrument" oninput="autoSave()"></div>
+<div class="form-group"><label>Low Target</label><input type="number" id="car-low-target" step="0.01" oninput="autoSave(); updateCarryOverDeviations()"></div>
+<div class="form-group"><label>High Target</label><input type="number" id="car-high-target" step="0.01" oninput="autoSave(); updateCarryOverDeviations()"></div>
+<div class="form-group"><label>Accept Criteria (%)</label><input type="number" id="car-criteria" value="1.0" step="0.1" oninput="autoSave(); calculateCarryOver()"></div>
+</div>
+<table class="data-table">
+<thead><tr><th>Seq</th><th>Type</th><th>Result</th><th>Deviation</th></tr></thead>
+<tbody id="car-table"></tbody>
+</table>
+<button class="btn btn-primary" onclick="initCarryOverTable()">🔄 Reset to Standard Sequence</button>
+<button class="btn btn-success" onclick="calculateCarryOver()">Force Calculate</button>
+<div id="car-results" class="results-panel hidden">
+<h3>Statistical Analysis</h3>
+<div class="results-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+<div class="result-card"><h4>Baseline Mean</h4><div class="result-value" id="car-bl-mean">-</div></div>
+<div class="result-card"><h4>Baseline SD</h4><div class="result-value" id="car-bl-sd">-</div></div>
+<div class="result-card"><h4>Baseline CV</h4><div class="result-value" id="car-bl-cv">-</div></div>
+<div class="result-card"><h4>Post-High Mean</h4><div class="result-value" id="car-ph-mean">-</div></div>
+<div class="result-card"><h4>Post-High SD</h4><div class="result-value" id="car-ph-sd">-</div></div>
+<div class="result-card"><h4>Post-High CV</h4><div class="result-value" id="car-ph-cv">-</div></div>
+<div class="result-card"><h4>High Mean</h4><div class="result-value" id="car-high-mean">-</div></div>
+<div class="result-card"><h4>Carryover</h4><div class="result-value" id="car-carry">-</div></div>
+<div class="result-card"><h4>Criteria</h4><div class="result-value" id="car-criteria-disp">-</div></div>
+<div class="result-card"><h4>Status</h4><div class="result-value" id="car-status">-</div></div>
+</div>
+<div class="recommendation-box" style="margin-top:12px;"><label>Conclusion & Recommendation:</label><textarea id="car-recommendation" readonly style="height: 80px;"></textarea></div>
+</div>
+</div>
+<!-- Reference Intervals -->
+<div id="ref-intervals" class="section">
+<div class="section-header">
+<h2>Reference Intervals Verification</h2>
+<button class="btn btn-report" onclick="generateTabReport('ref-intervals')">📄 Generate Report for This Tab</button>
+</div>
+<div class="info-box">
+<strong>CLSI EP28-A3c: Reference Intervals Verification & Establishment</strong><br>
+<strong>Why we do this:</strong> To verify that the established or manufacturer-provided reference intervals are appropriate for the laboratory's patient population, or to establish a new reference interval from a reference individual group.<br>
+<strong>Step-by-Step Instructions:</strong>
+<ol>
+<li>Enter the proposed Lower Limit and Upper Limit for the reference interval (if verifying an existing interval).</li>
+<li>Alternatively, enter the results of at least 20 healthy reference individuals and use the <strong>"Apply Parametric Limits"</strong> button to calculate the interval using the Standard Statistical Method.</li>
+<li><strong>Standard Statistical Method:</strong> If the data follows a normal (Gaussian) distribution, the range is calculated as the Mean ± 2 Standard Deviations (SD), which encompasses approximately 95% of the population.</li>
+<li>Click <strong>"Force Calculate"</strong>. The system will determine how many results fall outside the specified interval.</li>
+<li><strong>Acceptance Criteria (Verification):</strong> For 20 samples, if ≤ 2 results (10%) fall outside the interval, the reference interval is verified.</li>
+</ol>
+<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<strong>Formulas:</strong> <code>Parametric: Mean ± 2 SD</code> | <code>Non-Parametric: 2.5th and 97.5th Percentiles</code> | <code>Verification: Outliers ≤ 2 (for n=20)</code>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Instrument / Method</label><input type="text" id="ri-instrument" oninput="autoSave()"></div>
+<div class="form-group"><label>Specimen Type</label><input type="text" id="ri-specimen" oninput="autoSave()"></div>
+<div class="form-group"><label>Lower Limit</label><input type="number" id="ri-lower" step="0.01" oninput="autoSave(); calculateRefIntervals()"></div>
+<div class="form-group"><label>Upper Limit</label><input type="number" id="ri-upper" step="0.01" oninput="autoSave(); calculateRefIntervals()"></div>
+</div>
+<table class="data-table">
+<thead>
+<tr>
+<th>n</th>
+<th>Sample ID</th>
+<th>Result</th>
+<th>Within Interval?</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="ri-table"></tbody>
+</table>
+<button class="btn btn-primary" onclick="addRefIntervalRow()">+ Add Sample</button>
+<button class="btn btn-success" onclick="calculateRefIntervals()">Force Calculate</button>
+<button class="btn btn-info" onclick="applyParametricLimits()">Apply Parametric Limits (Mean ± 2 SD)</button>
+
+<div id="ri-results" class="results-panel hidden">
+<h3>Evaluation Summary (Verification)</h3>
+<div class="results-grid">
+<div class="result-card"><h4>Total Samples</h4><div class="result-value" id="ri-total">-</div></div>
+<div class="result-card"><h4>Within Limits</h4><div class="result-value" id="ri-within">-</div></div>
+<div class="result-card"><h4>Outside Limits</h4><div class="result-value" id="ri-outside">-</div></div>
+<div class="result-card"><h4>Status</h4><div class="result-value" id="ri-status">-</div></div>
+</div>
+
+<h3 style="margin-top: 20px; border-top: 1px solid #dee2e6; padding-top: 10px;">Reference Interval Calculation Methods</h3>
+<div class="results-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+<div class="result-card"><h4>Mean</h4><div class="result-value" id="ri-mean">-</div></div>
+<div class="result-card"><h4>Std Dev (SD)</h4><div class="result-value" id="ri-sd">-</div></div>
+<div class="result-card"><h4>Parametric Lower (Mean-2SD)</h4><div class="result-value" id="ri-param-lower">-</div></div>
+<div class="result-card"><h4>Parametric Upper (Mean+2SD)</h4><div class="result-value" id="ri-param-upper">-</div></div>
+<div class="result-card"><h4>Non-Parametric Lower (2.5th %ile)</h4><div class="result-value" id="ri-np-lower">-</div></div>
+<div class="result-card"><h4>Non-Parametric Upper (97.5th %ile)</h4><div class="result-value" id="ri-np-upper">-</div></div>
+</div>
+<div class="info-box" style="margin-top: 10px; font-size: 10px;">
+<strong>Statistical Note:</strong> The <strong>Parametric Method (Mean ± 2 SD)</strong> assumes the data follows a normal (Gaussian) distribution and encompasses ~95% of the population. If the data is heavily skewed or non-normal, the <strong>Non-Parametric Method (2.5th and 97.5th percentiles)</strong> is recommended by CLSI EP28-A3c.
+</div>
+
+<div class="results-compact-wrapper">
+<div class="results-chart-box"><canvas id="riChart"></canvas></div>
+<div class="results-text-box">
+<div class="recommendation-box">
+<label>Conclusion & Recommendation:</label>
+<textarea id="ri-recommendation" readonly></textarea>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">&copy; 2026 Lab SP.Mohammed al Desoqy. All Rights Reserved.</div>
+</div>
+<script>
+const DB_KEY = 'labValidationDB_FINAL_V3';
+let chartInstances = {};
+let db = {
+global: { hospital: '', department: '', performed: '', reviewed: '', date: '' },
+analytes: ['Hemoglobin'],
+currentAnalyte: 'Hemoglobin',
+records: {}
+};
+document.addEventListener('wheel', function(e) {
+if (document.activeElement && document.activeElement.type === 'number') {
+document.activeElement.blur();
+}
+}, { passive: true });
+// --- PDF MERGE FUNCTION ---
+async function mergePDFs(input) {
+const files = input.files;
+if (!files || files.length === 0) return;
+try {
+const { PDFDocument } = PDFLib;
+const mergedPdf = await PDFDocument.create();
+for (let i = 0; i < files.length; i++) {
+const file = files[i];
+const arrayBuffer = await file.arrayBuffer();
+const pdf = await PDFDocument.load(arrayBuffer);
+const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+copiedPages.forEach((page) => mergedPdf.addPage(page));
+}
+const pdfBytes = await mergedPdf.save();
+const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+const url = URL.createObjectURL(blob);
+const link = document.createElement('a');
+link.href = url;
+link.download = `Merged_Validation_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+URL.revokeObjectURL(url);
+alert('PDFs merged successfully!');
+} catch (error) {
+console.error('Error merging PDFs:', error);
+alert('An error occurred while merging the PDFs. Please ensure all selected files are valid PDFs.');
+}
+input.value = '';
+}
+// --- REPORT GENERATION FUNCTIONS ---
+async function generateTabReport(tabId) {
+const section = document.getElementById(tabId);
+if (!section) {
+alert('Section not found!');
+return;
+}
+const reportWindow = window.open('', '_blank', 'width=1200,height=800');
+if (!reportWindow) {
+alert('Please allow pop-ups to generate reports.');
+return;
+}
+const title = section.querySelector('h2').textContent;
+let html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${title} - Report</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fff; color: #000; padding: 20px; }
+.report-header { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+.report-header h1 { font-size: 24px; margin-bottom: 10px; }
+.report-header p { font-size: 12px; margin: 5px 0; }
+.section-title { font-size: 20px; font-weight: bold; margin: 20px 0 15px 0; border-bottom: 2px solid #000; padding-bottom: 8px; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; padding: 10px; border: 1px solid #000; }
+.info-grid div { font-size: 11px; }
+.info-grid label { font-weight: bold; font-size: 9px; text-transform: uppercase; }
+.data-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10px; }
+.data-table th, .data-table td { border: 1px solid #000; padding: 4px; text-align: left; }
+.data-table th { background: #f0f0f0; font-weight: bold; }
+.results-panel { border: 1px solid #000; padding: 10px; margin: 10px 0; }
+.results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+.result-card { border: 1px solid #000; padding: 5px; text-align: center; }
+.result-card h4 { font-size: 9px; margin-bottom: 3px; text-transform: uppercase; }
+.result-value { font-size: 14px; font-weight: bold; }
+.pass { color: #155724; background: #d4edda; padding: 2px 6px; border: 1px solid #c3e6cb; }
+.fail { color: #721c24; background: #f8d7da; padding: 2px 6px; border: 1px solid #f5c6cb; }
+.chart-container { width: 100%; margin: 15px 0; text-align: center; border: 2px solid #999; padding: 10px; }
+.chart-container img { max-width: 100%; max-height: 350px; border: 1px solid #666; }
+.recommendation { clear: both; margin-top: 10px; border: 1px solid #000; padding: 8px; }
+.recommendation label { font-weight: bold; font-size: 10px; }
+.recommendation textarea { width: 100%; border: none; font-size: 11px; resize: none; }
+.info-box { background: #f8f9fa; border-left: 4px solid #495057; padding: 12px; margin: 15px 0; font-size: 10px; line-height: 1.6; }
+.info-box strong { color: #212529; }
+.info-box ol { margin-left: 25px; margin-top: 8px; }
+.info-box code { background: #dee2e6; padding: 2px 6px; border-radius: 2px; font-family: monospace; }
+.form-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+.form-group { margin-bottom: 8px; }
+.form-group label { font-size: 9px; font-weight: bold; text-transform: uppercase; }
+.form-group span { font-size: 10px; display: block; padding: 2px 0; }
+.results-compact-wrapper { display: flex; gap: 15px; margin-top: 12px; align-items: flex-start; }
+.results-chart-box { width: 40%; min-width: 200px; border: 1px solid #999; padding: 8px; }
+.results-chart-box img { width: 100%; max-height: 200px; }
+.results-text-box { width: 60%; }
+.recommendation-box { border: 1px solid #999; padding: 8px; }
+.recommendation-box label { font-size: 9px; font-weight: bold; margin-bottom: 5px; display: block; }
+.recommendation-box div { border: 1px solid #ccc; padding: 6px; font-size: 10px; min-height: 50px; }
+@media print {
+body { padding: 10px; }
+.no-print { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="report-header">
+<h1>🔬 LABORATORY VALIDATION REPORT</h1>
+<p>Comprehensive Method Validation & Verification System</p>
+<p><strong>Created by:</strong> Lab SP.Mohammed al Desoqy</p>
+<p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+</div>
+<div class="section-title">${title}</div>
+<div class="info-grid">
+<div><label>Hospital/Facility</label><br>${document.getElementById('global-hospital').value || '-'}</div>
+<div><label>Department</label><br>${document.getElementById('global-department').value || '-'}</div>
+<div><label>Performed By</label><br>${document.getElementById('global-performed').value || '-'}</div>
+<div><label>Reviewed By</label><br>${document.getElementById('global-reviewed').value || '-'}</div>
+<div><label>Date</label><br>${document.getElementById('global-date').value || '-'}</div>
+<div><label>Analyte</label><br>${db.currentAnalyte}</div>
+</div>`;
+const clone = section.cloneNode(true);
+clone.querySelectorAll('button').forEach(btn => btn.remove());
+clone.querySelectorAll('input, select, textarea').forEach(el => {
+if (el.tagName === 'SELECT') {
+const text = document.createElement('span');
+text.textContent = el.options[el.selectedIndex]?.text || el.value;
+el.parentNode.replaceChild(text, el);
+} else if (el.tagName === 'TEXTAREA') {
+const div = document.createElement('div');
+div.textContent = el.value;
+div.style.border = '1px solid #000';
+div.style.padding = '5px';
+div.style.minHeight = '40px';
+el.parentNode.replaceChild(div, el);
+} else if (el.type !== 'hidden') {
+const span = document.createElement('span');
+span.textContent = el.value || '-';
+el.parentNode.replaceChild(span, el);
+}
+});
+const canvases = clone.querySelectorAll('canvas');
+const originalCanvases = section.querySelectorAll('canvas');
+canvases.forEach((cCanvas, i) => {
+const oCanvas = originalCanvases[i];
+if (oCanvas && oCanvas.width > 0 && oCanvas.height > 0) {
+const container = document.createElement('div');
+container.className = 'chart-container';
+const img = document.createElement('img');
+img.src = oCanvas.toDataURL('image/png', 1.0);
+img.alt = 'Chart';
+container.appendChild(img);
+cCanvas.parentNode.replaceChild(container, cCanvas);
+} else {
+cCanvas.remove();
+}
+});
+clone.querySelectorAll('.hidden').forEach(el => el.remove());
+html += clone.innerHTML;
+html += `<div class="no-print" style="text-align: center; margin-top: 30px; padding: 20px; border-top: 2px solid #000;">
+<button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">🖨️ Print Report</button>
+<button onclick="window.close()" style="padding: 10px 20px; font-size: 14px; cursor: pointer; margin-left: 10px;">Close</button>
+</div>`;
+html += `</body></html>`;
+reportWindow.document.write(html);
+reportWindow.document.close();
+}
+async function generateAllAnalytesReport() {
+const allTabs = ['precision', 'comparison-qual', 'comparison-quant', 'correlation', 'cutoff', 'linearity', 'carryover', 'ref-intervals'];
+const originalAnalyte = db.currentAnalyte;
+const reportWindow = window.open('', '_blank', 'width=1200,height=800');
+if (!reportWindow) {
+alert('Please allow pop-ups to generate reports.');
+return;
+}
+let html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Laboratory Validation Report</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fff; color: #000; padding: 20px; }
+.report-header { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+.report-header h1 { font-size: 24px; margin-bottom: 10px; }
+.report-header p { font-size: 12px; margin: 5px 0; }
+.analyte-section { margin-bottom: 40px; page-break-after: always; }
+.analyte-section:last-child { page-break-after: auto; }
+.section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 2px solid #000; padding-bottom: 5px; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; padding: 10px; border: 1px solid #000; }
+.info-grid div { font-size: 11px; }
+.info-grid label { font-weight: bold; font-size: 9px; text-transform: uppercase; }
+.data-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10px; }
+.data-table th, .data-table td { border: 1px solid #000; padding: 4px; text-align: left; }
+.data-table th { background: #f0f0f0; font-weight: bold; }
+.results-panel { border: 1px solid #000; padding: 10px; margin: 10px 0; }
+.results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+.result-card { border: 1px solid #000; padding: 5px; text-align: center; }
+.result-card h4 { font-size: 9px; margin-bottom: 3px; text-transform: uppercase; }
+.result-value { font-size: 14px; font-weight: bold; }
+.pass { color: #155724; background: #d4edda; padding: 2px 6px; border: 1px solid #c3e6cb; }
+.fail { color: #721c24; background: #f8d7da; padding: 2px 6px; border: 1px solid #f5c6cb; }
+.chart-container { width: 100%; margin: 15px 0; text-align: center; border: 2px solid #999; padding: 10px; }
+.chart-container img { max-width: 100%; max-height: 350px; border: 1px solid #666; }
+.recommendation { clear: both; margin-top: 10px; border: 1px solid #000; padding: 8px; }
+.recommendation label { font-weight: bold; font-size: 10px; }
+.recommendation textarea { width: 100%; border: none; font-size: 11px; resize: none; }
+.info-box { background: #f8f9fa; border-left: 4px solid #495057; padding: 12px; margin: 15px 0; font-size: 10px; line-height: 1.6; }
+.info-box strong { color: #212529; }
+.info-box ol { margin-left: 25px; margin-top: 8px; }
+.info-box code { background: #dee2e6; padding: 2px 6px; border-radius: 2px; font-family: monospace; }
+.form-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+.form-group { margin-bottom: 8px; }
+.form-group label { font-size: 9px; font-weight: bold; text-transform: uppercase; }
+.form-group span { font-size: 10px; display: block; padding: 2px 0; }
+.results-compact-wrapper { display: flex; gap: 15px; margin-top: 12px; align-items: flex-start; }
+.results-chart-box { width: 40%; min-width: 200px; border: 1px solid #999; padding: 8px; }
+.results-chart-box img { width: 100%; max-height: 200px; }
+.results-text-box { width: 60%; }
+.recommendation-box { border: 1px solid #999; padding: 8px; }
+.recommendation-box label { font-size: 9px; font-weight: bold; margin-bottom: 5px; display: block; }
+.recommendation-box div { border: 1px solid #ccc; padding: 6px; font-size: 10px; min-height: 50px; }
+@media print {
+body { padding: 10px; }
+.analyte-section { page-break-after: always; }
+.no-print { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="report-header">
+<h1>🔬 LABORATORY VALIDATION REPORT</h1>
+<p>Comprehensive Method Validation & Verification System</p>
+<p><strong>Created by:</strong> Lab SP.Mohammed al Desoqy</p>
+<p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+</div>`;
+for (const analyte of db.analytes) {
+db.currentAnalyte = analyte;
+loadCurrentFromDB();
+await new Promise(r => setTimeout(r, 500));
+html += `<div class="analyte-section">`;
+html += `<h2 style="text-align: center; margin-bottom: 20px;">Analyte: ${analyte}</h2>`;
+html += `<div class="info-grid">`;
+html += `<div><label>Hospital/Facility</label><br>${document.getElementById('global-hospital').value || '-'}</div>`;
+html += `<div><label>Department</label><br>${document.getElementById('global-department').value || '-'}</div>`;
+html += `<div><label>Performed By</label><br>${document.getElementById('global-performed').value || '-'}</div>`;
+html += `<div><label>Reviewed By</label><br>${document.getElementById('global-reviewed').value || '-'}</div>`;
+html += `<div><label>Date</label><br>${document.getElementById('global-date').value || '-'}</div>`;
+html += `</div>`;
+for (const tabId of allTabs) {
+const section = document.getElementById(tabId);
+if (!section) continue;
+const title = section.querySelector('h2').textContent;
+html += `<div class="section-title">${title}</div>`;
+const clone = section.cloneNode(true);
+clone.querySelectorAll('button').forEach(btn => btn.remove());
+clone.querySelectorAll('input, select, textarea').forEach(el => {
+if (el.tagName === 'SELECT') {
+const text = document.createElement('span');
+text.textContent = el.options[el.selectedIndex]?.text || el.value;
+el.parentNode.replaceChild(text, el);
+} else if (el.tagName === 'TEXTAREA') {
+const div = document.createElement('div');
+div.textContent = el.value;
+div.style.border = '1px solid #000';
+div.style.padding = '5px';
+div.style.minHeight = '40px';
+el.parentNode.replaceChild(div, el);
+} else if (el.type !== 'hidden') {
+const span = document.createElement('span');
+span.textContent = el.value || '-';
+el.parentNode.replaceChild(span, el);
+}
+});
+const canvases = clone.querySelectorAll('canvas');
+const originalCanvases = section.querySelectorAll('canvas');
+canvases.forEach((cCanvas, i) => {
+const oCanvas = originalCanvases[i];
+if (oCanvas && oCanvas.width > 0 && oCanvas.height > 0) {
+const container = document.createElement('div');
+container.className = 'chart-container';
+const img = document.createElement('img');
+img.src = oCanvas.toDataURL('image/png', 1.0);
+img.alt = 'Chart';
+container.appendChild(img);
+cCanvas.parentNode.replaceChild(container, cCanvas);
+} else {
+cCanvas.remove();
+}
+});
+clone.querySelectorAll('.hidden').forEach(el => el.remove());
+html += clone.innerHTML;
+}
+html += `</div>`;
+}
+html += `<div class="no-print" style="text-align: center; margin-top: 30px; padding: 20px; border-top: 2px solid #000;">
+<button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">️ Print Report</button>
+<button onclick="window.close()" style="padding: 10px 20px; font-size: 14px; cursor: pointer; margin-left: 10px;">Close</button>
+</div>`;
+html += `</body></html>`;
+reportWindow.document.write(html);
+reportWindow.document.close();
+db.currentAnalyte = originalAnalyte;
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+document.getElementById('precision').classList.add('active');
+document.querySelector('.nav-tab[onclick*="precision"]').classList.add('active');
+loadCurrentFromDB();
+}
+// --- DATABASE MANAGEMENT ---
+function saveGlobalToDB() {
+db.global.hospital = document.getElementById('global-hospital').value;
+db.global.department = document.getElementById('global-department').value;
+db.global.performed = document.getElementById('global-performed').value;
+db.global.reviewed = document.getElementById('global-reviewed').value;
+db.global.date = document.getElementById('global-date').value;
+}
+function autoSave() {
+saveGlobalToDB();
+saveCurrentToDB();
+localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+function saveCurrentToDB() {
+if (!db.currentAnalyte) return;
+db.records[db.currentAnalyte] = {
+precision: {
+instrument: document.getElementById('prec-instrument').value,
+levels: document.getElementById('prec-levels').value,
+l1: document.getElementById('prec-accept-l1').value,
+l2: document.getElementById('prec-accept-l2').value,
+l3: document.getElementById('prec-accept-l3').value,
+rows: Array.from(document.querySelectorAll('#precision-table tr')).map(r => ({
+date: r.cells[1].querySelector('input').value,
+l1: r.cells[2].querySelector('input').value,
+l2: r.cells[3].querySelector('input').value,
+l3: r.cells[4].classList.contains('hidden') ? '' : r.cells[4].querySelector('input').value
+}))
+},
+qual: {
+ref: document.getElementById('qual-ref').value,
+comp: document.getElementById('qual-comp').value,
+rows: Array.from(document.querySelectorAll('#qual-table tr')).map(r => ({
+id: r.cells[1].querySelector('input').value,
+a: r.cells[2].querySelector('select').value,
+b: r.cells[3].querySelector('select').value
+}))
+},
+quant: {
+tea: document.getElementById('quant-tea').value,
+rows: Array.from(document.querySelectorAll('#quant-table tr')).map(r => ({
+id: r.cells[1].querySelector('input').value,
+a: r.cells[2].querySelector('input').value,
+b: r.cells[3].querySelector('input').value
+}))
+},
+corr: {
+ref: document.getElementById('corr-ref').value,
+comp: document.getElementById('corr-comp').value,
+rows: Array.from(document.querySelectorAll('#corr-table tr')).map(r => ({
+id: r.cells[1].querySelector('input').value,
+a: r.cells[2].querySelector('input').value,
+b: r.cells[3].querySelector('input').value
+}))
+},
+cutoff: {
+value: document.getElementById('co-value').value,
+criteria: document.getElementById('co-criteria').value,
+rows1: Array.from(document.querySelectorAll('#co-table-1 tr')).map(r => ({ res: r.cells[1].querySelector('input').value })),
+rows2: Array.from(document.querySelectorAll('#co-table-2 tr')).map(r => ({ res: r.cells[1].querySelector('input').value }))
+},
+linearity: {
+instrument: document.getElementById('lin-instrument').value,
+tea: document.getElementById('lin-tea').value,
+rows: Array.from(document.querySelectorAll('#lin-table tr')).map(r => ({
+target: r.cells[1].querySelector('input').value,
+r1: r.cells[2].querySelector('input').value,
+r2: r.cells[3].querySelector('input').value
+}))
+},
+carryover: {
+instrument: document.getElementById('car-instrument').value,
+lowTarget: document.getElementById('car-low-target').value,
+highTarget: document.getElementById('car-high-target').value,
+criteria: document.getElementById('car-criteria').value,
+rows: Array.from(document.querySelectorAll('#car-table tr')).map(r => ({
+id: r.cells[0].textContent.trim(),
+type: r.cells[1].textContent.trim().split(' ')[0],
+res: r.cells[2].querySelector('input')?.value || ''
+}))
+},
+refIntervals: {
+instrument: document.getElementById('ri-instrument').value,
+specimen: document.getElementById('ri-specimen').value,
+lower: document.getElementById('ri-lower').value,
+upper: document.getElementById('ri-upper').value,
+rows: Array.from(document.querySelectorAll('#ri-table tr')).map(r => ({
+id: r.cells[1].querySelector('input').value,
+res: r.cells[2].querySelector('input').value
+}))
+}
+};
+}
+function loadCurrentFromDB() {
+const data = db.records[db.currentAnalyte] || {};
+clearForms();
+document.getElementById('prec-instrument').value = data.precision?.instrument || '';
+document.getElementById('prec-levels').value = data.precision?.levels || '2';
+document.getElementById('prec-accept-l1').value = data.precision?.l1 || '';
+document.getElementById('prec-accept-l2').value = data.precision?.l2 || '';
+document.getElementById('prec-accept-l3').value = data.precision?.l3 || '';
+updatePrecisionLevels();
+data.precision?.rows.forEach(r => addPrecisionRowWithData(r));
+document.getElementById('qual-ref').value = data.qual?.ref || '';
+document.getElementById('qual-comp').value = data.qual?.comp || '';
+data.qual?.rows.forEach(r => addQualRowWithData(r));
+document.getElementById('quant-tea').value = data.quant?.tea || '10';
+data.quant?.rows.forEach(r => addQuantRowWithData(r));
+document.getElementById('corr-ref').value = data.corr?.ref || '';
+document.getElementById('corr-comp').value = data.corr?.comp || '';
+data.corr?.rows.forEach(r => addCorrRowWithData(r));
+document.getElementById('co-value').value = data.cutoff?.value || '';
+document.getElementById('co-criteria').value = data.cutoff?.criteria || '95';
+data.cutoff?.rows1.forEach(r => addCutOffRowWithData(1, r.res));
+data.cutoff?.rows2.forEach(r => addCutOffRowWithData(2, r.res));
+document.getElementById('lin-instrument').value = data.linearity?.instrument || '';
+document.getElementById('lin-tea').value = data.linearity?.tea || '10';
+data.linearity?.rows.forEach(r => addLinearityRowWithData(r));
+document.getElementById('car-instrument').value = data.carryover?.instrument || '';
+document.getElementById('car-low-target').value = data.carryover?.lowTarget || '';
+document.getElementById('car-high-target').value = data.carryover?.highTarget || '';
+document.getElementById('car-criteria').value = data.carryover?.criteria || '1.0';
+if (data.carryover && data.carryover.rows && data.carryover.rows.length > 0) {
+data.carryover.rows.forEach(r => {
+const seqItem = carSequence.find(s => s.id === r.id);
+const phase = seqItem ? seqItem.phase : '';
+addCarryOverRowWithData(r.id, r.type, phase, r.res);
+});
+} else {
+initCarryOverTable();
+}
+updateCarryOverDeviations();
+
+document.getElementById('ri-instrument').value = data.refIntervals?.instrument || '';
+document.getElementById('ri-specimen').value = data.refIntervals?.specimen || '';
+document.getElementById('ri-lower').value = data.refIntervals?.lower || '';
+document.getElementById('ri-upper').value = data.refIntervals?.upper || '';
+data.refIntervals?.rows.forEach(r => addRefIntervalRowWithData(r));
+
+calculatePrecision(); calculateQual(); calculateQuant(); calculateCorr(); calculateCutOff(); calculateLinearity(); calculateCarryOver(); calculateRefIntervals();
+}
+function clearForms() {
+document.getElementById('prec-instrument').value = '';
+document.getElementById('prec-levels').value = '2';
+document.getElementById('prec-accept-l1').value = '';
+document.getElementById('prec-accept-l2').value = '';
+document.getElementById('prec-accept-l3').value = '';
+document.getElementById('precision-table').innerHTML = '';
+document.getElementById('qual-ref').value = '';
+document.getElementById('qual-comp').value = '';
+document.getElementById('qual-table').innerHTML = '';
+document.getElementById('quant-tea').value = '10';
+document.getElementById('quant-table').innerHTML = '';
+document.getElementById('corr-ref').value = '';
+document.getElementById('corr-comp').value = '';
+document.getElementById('corr-table').innerHTML = '';
+document.getElementById('co-value').value = '';
+document.getElementById('co-criteria').value = '95';
+document.getElementById('co-table-1').innerHTML = '';
+document.getElementById('co-table-2').innerHTML = '';
+document.getElementById('lin-instrument').value = '';
+document.getElementById('lin-tea').value = '10';
+document.getElementById('lin-table').innerHTML = '';
+document.getElementById('car-instrument').value = '';
+document.getElementById('car-low-target').value = '';
+document.getElementById('car-high-target').value = '';
+document.getElementById('car-criteria').value = '1.0';
+document.getElementById('car-table').innerHTML = '';
+document.getElementById('ri-instrument').value = '';
+document.getElementById('ri-specimen').value = '';
+document.getElementById('ri-lower').value = '';
+document.getElementById('ri-upper').value = '';
+document.getElementById('ri-table').innerHTML = '';
+document.querySelectorAll('.results-panel').forEach(p => p.classList.add('hidden'));
+Object.values(chartInstances).forEach(c => { if(c) c.destroy(); });
+chartInstances = {};
+updatePrecisionLevels();
+}
+function switchAnalyte(newName) {
+if (!newName || db.currentAnalyte === newName) return;
+saveCurrentToDB();
+db.currentAnalyte = newName;
+renderAnalyteSelector();
+loadCurrentFromDB();
+autoSave();
+}
+function addNewAnalyte() {
+const input = document.getElementById('new-analyte-input');
+const newName = input.value.trim();
+if (!newName) return;
+if (db.analytes.includes(newName)) {
+alert('This analyte already exists. Please select it from the dropdown.');
+return;
+}
+saveCurrentToDB();
+db.analytes.push(newName);
+db.currentAnalyte = newName;
+db.records[newName] = {};
+input.value = '';
+renderAnalyteSelector();
+loadCurrentFromDB();
+autoSave();
+}
+function removeCurrentAnalyte() {
+if (db.analytes.length <= 1) {
+alert('You must keep at least one analyte in the database.');
+return;
+}
+if (!confirm(`Are you sure you want to permanently delete ALL data for "${db.currentAnalyte}"?`)) return;
+const idx = db.analytes.indexOf(db.currentAnalyte);
+db.analytes.splice(idx, 1);
+delete db.records[db.currentAnalyte];
+db.currentAnalyte = db.analytes[0];
+renderAnalyteSelector();
+loadCurrentFromDB();
+autoSave();
+}
+function renderAnalyteSelector() {
+const sel = document.getElementById('analyte-selector');
+sel.innerHTML = '';
+db.analytes.forEach(a => {
+const opt = document.createElement('option');
+opt.value = a;
+opt.textContent = a;
+if (a === db.currentAnalyte) opt.selected = true;
+sel.appendChild(opt);
+});
+}
+function loadFromLocalStorage() {
+const saved = localStorage.getItem(DB_KEY);
+if (saved) {
+const parsed = JSON.parse(saved);
+db.global = parsed.global || db.global;
+db.analytes = parsed.analytes || db.analytes;
+db.currentAnalyte = parsed.currentAnalyte || db.analytes[0];
+db.records = parsed.records || {};
+document.getElementById('global-hospital').value = db.global.hospital || '';
+document.getElementById('global-department').value = db.global.department || '';
+document.getElementById('global-performed').value = db.global.performed || '';
+document.getElementById('global-reviewed').value = db.global.reviewed || '';
+document.getElementById('global-date').value = db.global.date || new Date().toISOString().split('T')[0];
+} else {
+document.getElementById('global-date').valueAsDate = new Date();
+}
+renderAnalyteSelector();
+loadCurrentFromDB();
+}
+function showSection(id) {
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+event.target.classList.add('active');
+}
+function removeRow(btn) {
+const row = btn.closest('tr');
+const tbody = row.parentNode;
+row.remove();
+Array.from(tbody.rows).forEach((r, i) => {
+if (r.cells[0] && !isNaN(parseInt(r.cells[0].textContent.trim()))) r.cells[0].textContent = i + 1;
+});
+autoSave();
+if (tbody.id === 'precision-table') calculatePrecision();
+else if (tbody.id === 'qual-table') calculateQual();
+else if (tbody.id === 'quant-table') calculateQuant();
+else if (tbody.id === 'corr-table') calculateCorr();
+else if (tbody.id === 'lin-table') calculateLinearity();
+else if (tbody.id === 'co-table-1' || tbody.id === 'co-table-2') { updateCutOffTables(); calculateCutOff(); }
+else if (tbody.id === 'ri-table') calculateRefIntervals();
+}
+document.addEventListener('keydown', function(e) {
+const el = e.target;
+if (!el.matches('input:not([type="hidden"]):not([disabled]), select, textarea')) return;
+if (el.tagName === 'TEXTAREA' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+if (el.selectionStart > 0 && e.key === 'ArrowUp') return;
+if (el.selectionStart < el.value.length && e.key === 'ArrowDown') return;
+}
+const currentRect = el.getBoundingClientRect();
+const allInputs = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([disabled]), select, textarea')).filter(i => i.offsetParent !== null);
+let bestTarget = null;
+let minDistance = Infinity;
+for (const target of allInputs) {
+if (target === el) continue;
+const targetRect = target.getBoundingClientRect();
+if (e.key === 'ArrowDown') {
+if (targetRect.top >= currentRect.top - 5) {
+const distY = targetRect.top - currentRect.bottom;
+const distX = Math.abs(targetRect.left - currentRect.left);
+const distance = (distY >= 0 ? distY : 0) * 10 + distX;
+if (distY >= -5 && distance < minDistance) { minDistance = distance; bestTarget = target; }
+}
+} else if (e.key === 'ArrowUp') {
+if (targetRect.bottom <= currentRect.bottom + 5) {
+const distY = currentRect.top - targetRect.bottom;
+const distX = Math.abs(targetRect.left - currentRect.left);
+const distance = (distY >= 0 ? distY : 0) * 10 + distX;
+if (distY >= -5 && distance < minDistance) { minDistance = distance; bestTarget = target; }
+}
+} else if (e.key === 'ArrowRight') {
+if (targetRect.left >= currentRect.left - 5) {
+const distX = targetRect.left - currentRect.right;
+const distY = Math.abs(targetRect.top - currentRect.top);
+const distance = (distX >= 0 ? distX : 0) * 10 + distY;
+if (distX >= -5 && distance < minDistance) { minDistance = distance; bestTarget = target; }
+}
+} else if (e.key === 'ArrowLeft') {
+if (targetRect.right <= currentRect.right + 5) {
+const distX = currentRect.left - targetRect.right;
+const distY = Math.abs(targetRect.top - currentRect.top);
+const distance = (distX >= 0 ? distX : 0) * 10 + distY;
+if (distX >= -5 && distance < minDistance) { minDistance = distance; bestTarget = target; }
+}
+}
+}
+if (bestTarget) {
+e.preventDefault();
+bestTarget.focus();
+if (bestTarget.type !== 'date' && bestTarget.type !== 'checkbox' && bestTarget.type !== 'radio') {
+bestTarget.select();
+}
+}
+});
+// --- CALCULATION ENGINES ---
+function updatePrecisionLevels() {
+const levels = document.getElementById('prec-levels').value;
+const is3 = levels === '3';
+document.getElementById('th-l3').classList.toggle('hidden', !is3);
+document.querySelectorAll('.p-l3').forEach(el => el.parentElement.classList.toggle('hidden', !is3));
+document.getElementById('prec-l3-group').classList.toggle('hidden', !is3);
+document.getElementById('res-l3-mean-card').classList.toggle('hidden', !is3);
+document.getElementById('res-l3-cv-card').classList.toggle('hidden', !is3);
+document.getElementById('res-l3-status-card').classList.toggle('hidden', !is3);
+calculatePrecision();
+}
+function addPrecisionRow() { addPrecisionRowWithData({date:'', l1:'', l2:'', l3:''}); }
+function addPrecisionRowWithData(r) {
+const tbody = document.getElementById('precision-table');
+const row = tbody.insertRow();
+const is3 = document.getElementById('prec-levels').value === '3';
+row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="date" value="${r.date || ''}" oninput="autoSave(); calculatePrecision()"></td><td><input type="number" step="0.01" class="p-l1" value="${r.l1 || ''}" oninput="autoSave(); calculatePrecision()"></td><td><input type="number" step="0.01" class="p-l2" value="${r.l2 || ''}" oninput="autoSave(); calculatePrecision()"></td><td class="${is3 ? '' : 'hidden'}"><input type="number" step="0.01" class="p-l3" value="${r.l3 || ''}" oninput="autoSave(); calculatePrecision()"></td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+}
+function calculatePrecision() {
+const calcStats = (cls) => {
+const vals = Array.from(document.querySelectorAll('.'+cls)).map(i => parseFloat(i.value)).filter(v => !isNaN(v));
+if(vals.length < 2) return null;
+const mean = Math.abs(vals.reduce((a,b)=>a+b,0)/vals.length);
+const sd = Math.sqrt(vals.reduce((sq,n)=>sq+Math.pow(n-Math.abs(vals.reduce((a,b)=>a+b,0)/vals.length),2),0)/(vals.length-1));
+return { mean, sd, cv: (sd/mean)*100, vals };
+};
+const l1 = calcStats('p-l1'), l2 = calcStats('p-l2'), l3 = calcStats('p-l3');
+let l1Pass = true, l2Pass = true, l3Pass = true;
+if(l1) {
+document.getElementById('prec-l1-mean').textContent = l1.mean.toFixed(3);
+document.getElementById('prec-l1-cv').textContent = l1.cv.toFixed(2)+'%';
+const acc = parseFloat(document.getElementById('prec-accept-l1').value);
+const status = (!acc || l1.cv <= acc) ? 'PASS' : 'FAIL';
+if(status === 'FAIL') l1Pass = false;
+document.getElementById('prec-l1-status').innerHTML = `<span class="${status==='PASS'?'pass':'fail'}">${status}</span>`;
+}
+if(l2) {
+document.getElementById('prec-l2-mean').textContent = l2.mean.toFixed(3);
+document.getElementById('prec-l2-cv').textContent = l2.cv.toFixed(2)+'%';
+const acc = parseFloat(document.getElementById('prec-accept-l2').value);
+const status = (!acc || l2.cv <= acc) ? 'PASS' : 'FAIL';
+if(status === 'FAIL') l2Pass = false;
+document.getElementById('prec-l2-status').innerHTML = `<span class="${status==='PASS'?'pass':'fail'}">${status}</span>`;
+}
+if(l3 && document.getElementById('prec-levels').value === '3') {
+document.getElementById('prec-l3-mean').textContent = l3.mean.toFixed(3);
+document.getElementById('prec-l3-cv').textContent = l3.cv.toFixed(2)+'%';
+const acc = parseFloat(document.getElementById('prec-accept-l3').value);
+const status = (!acc || l3.cv <= acc) ? 'PASS' : 'FAIL';
+if(status === 'FAIL') l3Pass = false;
+document.getElementById('prec-l3-status').innerHTML = `<span class="${status==='PASS'?'pass':'fail'}">${status}</span>`;
+}
+document.getElementById('precision-results').classList.remove('hidden');
+const ctx = document.getElementById('precChart').getContext('2d');
+if(chartInstances.prec) chartInstances.prec.destroy();
+const labels = l1 ? l1.vals.map((_, i) => `R${i+1}`) : [];
+const datasets = [
+{ label: 'L1', data: l1 ? l1.vals : [], borderColor: '#000000', pointRadius: 3, tension: 0.1 },
+{ label: 'L2', data: l2 ? l2.vals : [], borderColor: '#666666', pointRadius: 3, tension: 0.1 }
+];
+if(l3 && document.getElementById('prec-levels').value === '3') {
+datasets.push({ label: 'L3', data: l3.vals, borderColor: '#999999', pointRadius: 3, tension: 0.1 });
+}
+chartInstances.prec = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+const allPass = l1Pass && l2Pass && (document.getElementById('prec-levels').value === '2' || l3Pass);
+document.getElementById('prec-recommendation').value = allPass ? "CONCLUSION: Precision within acceptable limits.\nRECOMMENDATION: Verified for routine use." : "CONCLUSION: Precision exceeds limits.\nRECOMMENDATION: Investigate imprecision sources.";
+}
+function addQualRow() { addQualRowWithData({id:'', a:'REACTIVE', b:'REACTIVE'}); }
+function addQualRowWithData(r) {
+const tbody = document.getElementById('qual-table');
+const row = tbody.insertRow();
+row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" value="${r.id}" oninput="autoSave()"></td><td><select class="q-a" onchange="autoSave(); updateQualDisc(this)"><option ${r.a==='REACTIVE'?'selected':''}>REACTIVE</option><option ${r.a==='NON-REACTIVE'?'selected':''}>NON-REACTIVE</option></select></td><td><select class="q-b" onchange="autoSave(); updateQualDisc(this)"><option ${r.b==='REACTIVE'?'selected':''}>REACTIVE</option><option ${r.b==='NON-REACTIVE'?'selected':''}>NON-REACTIVE</option></select></td><td class="q-disc">NO</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+updateQualDisc(row.querySelector('.q-a'));
+}
+function updateQualDisc(sel) {
+const row = sel.closest('tr');
+const a = row.querySelector('.q-a').value, b = row.querySelector('.q-b').value;
+const disc = row.querySelector('.q-disc');
+disc.textContent = (a!==b)?'YES':'NO';
+disc.className = 'q-disc ' + ((a!==b)?'fail':'pass');
+calculateQual();
+}
+function calculateQual() {
+let tp=0, tn=0, fp=0, fn=0;
+document.querySelectorAll('#qual-table tr').forEach(row => {
+const a = row.querySelector('.q-a')?.value, b = row.querySelector('.q-b')?.value;
+if(a && b) { if(a==='REACTIVE') { if(b==='REACTIVE') tp++; else fn++; } else { if(b==='REACTIVE') fp++; else tn++; } }
+});
+const total = tp+tn+fp+fn;
+document.getElementById('qual-sens').textContent = ((tp/(tp+fn))*100 || 0).toFixed(1)+'%';
+document.getElementById('qual-spec').textContent = ((tn/(tn+fp))*100 || 0).toFixed(1)+'%';
+document.getElementById('qual-total').textContent = total;
+document.getElementById('qual-results').classList.remove('hidden');
+const ctx = document.getElementById('qualChart').getContext('2d');
+if(chartInstances.qual) chartInstances.qual.destroy();
+chartInstances.qual = new Chart(ctx, { type: 'bar', data: { labels: ['TP', 'TN', 'FP', 'FN'], datasets: [{ data: [tp, tn, fp, fn], backgroundColor: ['#000000', '#444444', '#888888', '#cccccc'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+const pass = (((tp/(tp+fn))*100 || 0) >= 95 && ((tn/(tn+fp))*100 || 0) >= 95);
+document.getElementById('qual-recommendation').value = pass ? "CONCLUSION: Agreement meets criteria (≥95%).\nRECOMMENDATION: Verified for routine use." : "CONCLUSION: Agreement below criteria.\nRECOMMENDATION: Review discrepant samples.";
+}
+function addQuantRow() { addQuantRowWithData({id:'', a:'', b:''}); }
+function addQuantRowWithData(r) {
+const tbody = document.getElementById('quant-table');
+const row = tbody.insertRow();
+row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" value="${r.id}" oninput="autoSave()"></td><td><input type="number" step="0.01" class="q-a" value="${r.a}" oninput="autoSave(); calcQuantRow(this)"></td><td><input type="number" step="0.01" class="q-b" value="${r.b}" oninput="autoSave(); calcQuantRow(this)"></td><td class="q-bias">-</td><td class="q-pass">-</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+if(r.a && r.b) calcQuantRow(row.querySelector('.q-a'));
+}
+function calcQuantRow(input) {
+const row = input.closest('tr');
+const a = parseFloat(row.querySelector('.q-a').value), b = parseFloat(row.querySelector('.q-b').value);
+const tea = parseFloat(document.getElementById('quant-tea').value) || 10;
+if(!isNaN(a) && !isNaN(b) && a!==0) {
+const bias = Math.abs(((b-a)/a)*100);
+row.querySelector('.q-bias').textContent = bias.toFixed(2)+'%';
+row.querySelector('.q-pass').innerHTML = (bias <= tea) ? '<span class="pass">PASS</span>' : '<span class="fail">FAIL</span>';
+}
+calculateQuant();
+}
+function calculateQuant() {
+const a = [], b = [];
+document.querySelectorAll('#quant-table tr').forEach(row => {
+const va = parseFloat(row.querySelector('.q-a')?.value), vb = parseFloat(row.querySelector('.q-b')?.value);
+if(!isNaN(va) && !isNaN(vb)) { a.push(va); b.push(vb); }
+});
+let acc=0, unacc=0;
+document.querySelectorAll('#quant-table tr').forEach(row => {
+const passCell = row.querySelector('.q-pass span');
+if(passCell) { if(passCell.classList.contains('pass')) acc++; else if(passCell.classList.contains('fail')) unacc++; }
+});
+document.getElementById('quant-acc').textContent = acc;
+document.getElementById('quant-unacc').textContent = unacc;
+document.getElementById('quant-results').classList.remove('hidden');
+if(a.length > 1) {
+const n = a.length;
+const sumA = a.reduce((x,y)=>x+y,0), sumB = b.reduce((x,y)=>x+y,0);
+const sumAB = a.reduce((s,x,i)=>s+x*b[i],0), sumA2 = a.reduce((s,x)=>s+x*x,0);
+const denom = (n*sumA2 - sumA*sumA);
+const slope = denom !== 0 ? (n*sumAB - sumA*sumB)/denom : 0;
+const intercept = (sumB - slope*sumA)/n;
+const diffs = a.map((v, i) => b[i] - v);
+const meanDiff = Math.abs(diffs.reduce((s, v) => s + v, 0) / n);
+document.getElementById('quant-mean-bias').textContent = meanDiff.toFixed(3);
+document.getElementById('quant-slope').textContent = Math.abs(slope).toFixed(4);
+const ctx = document.getElementById('quantScatterChart').getContext('2d');
+if(chartInstances.quant) chartInstances.quant.destroy();
+chartInstances.quant = new Chart(ctx, { type: 'scatter', data: { datasets: [
+{ label: 'Samples', data: a.map((x,i)=>({x,y:b[i]})), backgroundColor: '#000000', pointRadius: 3 },
+{ label: 'Regression', data: [{x:Math.min(...a), y:slope*Math.min(...a)+intercept}, {x:Math.max(...a), y:slope*Math.max(...a)+intercept}], type: 'line', borderColor: '#000000', pointRadius: 0, borderWidth: 1 },
+{ label: 'Identity', data: [{x:Math.min(...a), y:Math.min(...a)}, {x:Math.max(...a), y:Math.max(...a)}], type: 'line', borderColor: '#888888', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+}
+const eval = (acc + unacc) > 0 ? ((unacc/(acc+unacc))*100 <= 25 ? 'ACCEPTABLE' : 'UNACCEPTABLE') : 'N/A';
+document.getElementById('quant-recommendation').value = eval === 'ACCEPTABLE' ? "CONCLUSION: Systematic bias within allowable limits.\nRECOMMENDATION: Verified for routine use." : "CONCLUSION: Systematic bias exceeds limits.\nRECOMMENDATION: Investigate calibration/matrix effects.";
+}
+function addCorrRow() { addCorrRowWithData({id:'', a:'', b:''}); }
+function addCorrRowWithData(r) {
+const tbody = document.getElementById('corr-table');
+const row = tbody.insertRow();
+row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" value="${r.id}" oninput="autoSave()"></td><td><input type="number" step="0.01" class="c-a" value="${r.a}" oninput="autoSave(); calculateCorr()"></td><td><input type="number" step="0.01" class="c-b" value="${r.b}" oninput="autoSave(); calculateCorr()"></td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+}
+function calculateCorr() {
+const a=[], b=[];
+document.querySelectorAll('#corr-table tr').forEach(row => {
+const va = parseFloat(row.querySelector('.c-a')?.value), vb = parseFloat(row.querySelector('.c-b')?.value);
+if(!isNaN(va) && !isNaN(vb)) { a.push(va); b.push(vb); }
+});
+if(a.length < 2) return;
+const n = a.length;
+const sumA = a.reduce((x,y)=>x+y,0), sumB = b.reduce((x,y)=>x+y,0);
+const sumAB = a.reduce((s,x,i)=>s+x*b[i],0), sumA2 = a.reduce((s,x)=>s+x*x,0);
+const slope = (n*sumAB - sumA*sumB)/(n*sumA2 - sumA*sumA);
+const intercept = (sumB - slope*sumA)/n;
+const meanA = sumA/n, meanB = sumB/n;
+const num = a.reduce((s,x,i)=>s+(x-meanA)*(b[i]-meanB),0);
+const den = Math.sqrt(a.reduce((s,x)=>s+(x-meanA)**2,0) * b.reduce((s,x)=>s+(x-meanB)**2,0));
+const r = den !== 0 ? num/den : 0;
+document.getElementById('corr-slope').textContent = Math.abs(slope).toFixed(4);
+document.getElementById('corr-int').textContent = Math.abs(intercept).toFixed(4);
+document.getElementById('corr-r').textContent = Math.abs(r).toFixed(4);
+document.getElementById('corr-r2').textContent = (r*r).toFixed(4);
+const ctx = document.getElementById('corrChart').getContext('2d');
+if(chartInstances.corr) chartInstances.corr.destroy();
+chartInstances.corr = new Chart(ctx, { type: 'scatter', data: { datasets: [
+{ label: 'Data', data: a.map((x,i)=>({x,y:b[i]})), backgroundColor: '#000000', pointRadius: 3 },
+{ label: 'Regression', data: [{x:Math.min(...a), y:slope*Math.min(...a)+intercept}, {x:Math.max(...a), y:slope*Math.max(...a)+intercept}], type: 'line', borderColor: '#000000', pointRadius: 0, borderWidth: 1 },
+{ label: 'Identity', data: [{x:Math.min(...a), y:Math.min(...a)}, {x:Math.max(...a), y:Math.max(...a)}], type: 'line', borderColor: '#888888', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+document.getElementById('corr-results').classList.remove('hidden');
+document.getElementById('corr-recommendation').value = Math.abs(r) >= 0.95 ? "CONCLUSION: Strong correlation observed (r ≥ 0.95).\nRECOMMENDATION: Methods are comparable." : "CONCLUSION: Weak correlation observed.\nRECOMMENDATION: Investigate methodological differences.";
+}
+function addCutOffRowWithData(tbl, val) {
+const tbody = document.getElementById(`co-table-${tbl}`);
+const row = tbody.insertRow();
+row.innerHTML = `<td>${tbody.rows.length}</td><td><input type="number" step="0.01" class="co-r${tbl}" value="${val}" oninput="autoSave(); updateCutOffTables(); calculateCutOff()"></td><td class="co-e${tbl}">${tbl===1?'Neg':'Pos'}</td><td class="co-d${tbl} pass">NO</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+}
+function addCutOffRows() { for(let i=0; i<5; i++) { addCutOffRowWithData(1, ''); addCutOffRowWithData(2, ''); } }
+function updateCutOffTables() {
+const cutoff = parseFloat(document.getElementById('co-value').value);
+if(isNaN(cutoff)) return;
+document.querySelectorAll('.co-r1').forEach(input => {
+const val = parseFloat(input.value), disc = input.closest('tr').querySelector('.co-d1');
+if(!isNaN(val)) { disc.textContent = val < cutoff ? 'NO' : 'YES'; disc.className = 'co-d1 ' + (val < cutoff ? 'pass' : 'fail'); }
+});
+document.querySelectorAll('.co-r2').forEach(input => {
+const val = parseFloat(input.value), disc = input.closest('tr').querySelector('.co-d2');
+if(!isNaN(val)) { disc.textContent = val >= cutoff ? 'NO' : 'YES'; disc.className = 'co-d2 ' + (val >= cutoff ? 'pass' : 'fail'); }
+});
+}
+function calculateCutOff() {
+const crit = parseFloat(document.getElementById('co-criteria').value) || 95;
+const countDisc = (cls) => Array.from(document.querySelectorAll('.'+cls)).filter(c => c.textContent === 'YES').length;
+const total1 = document.querySelectorAll('.co-r1').length, total2 = document.querySelectorAll('.co-r2').length;
+const ach1 = total1 > 0 ? ((total1-countDisc('co-d1'))/total1)*100 : 0;
+const ach2 = total2 > 0 ? ((total2-countDisc('co-d2'))/total2)*100 : 0;
+document.getElementById('co-ach1').textContent = ach1.toFixed(1)+'%';
+document.getElementById('co-stat1').innerHTML = `<span class="${ach1 >= crit ? 'pass' : 'fail'}">${ach1 >= crit ? 'VERIFIED' : 'FAILED'}</span>`;
+document.getElementById('co-ach2').textContent = ach2.toFixed(1)+'%';
+document.getElementById('co-stat2').innerHTML = `<span class="${ach2 >= crit ? 'pass' : 'fail'}">${ach2 >= crit ? 'VERIFIED' : 'FAILED'}</span>`;
+document.getElementById('co-results').classList.remove('hidden');
+document.getElementById('co-recommendation').value = (ach1 >= crit && ach2 >= crit) ? "CONCLUSION: Cut-off verification meets criteria.\nRECOMMENDATION: Verified for clinical use." : "CONCLUSION: Cut-off verification failed.\nRECOMMENDATION: Re-evaluate sample selection or calibration.";
+}
+function addLinearityRow() { addLinearityRowWithData({target:'', r1:'', r2:''}); }
+function addLinearityRowWithData(r) {
+const tbody = document.getElementById('lin-table');
+const row = tbody.insertRow();
+const labels = ['A','B','C','D','E','F','G','H','I','J'];
+row.innerHTML = `<td><b>${labels[tbody.rows.length-1] || tbody.rows.length}</b></td><td><input type="number" step="0.01" class="l-target" value="${r.target}" oninput="autoSave(); calculateLinearity()"></td><td><input type="number" step="0.01" class="l-r1" value="${r.r1}" oninput="autoSave(); calculateLinearity()"></td><td><input type="number" step="0.01" class="l-r2" value="${r.r2}" oninput="autoSave(); calculateLinearity()"></td><td class="l-mean">-</td><td class="l-exp">-</td><td class="l-dev">-</td><td class="l-pdev">-</td><td class="l-eval">-</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+}
+function calculateLinearity() {
+const data = [];
+document.querySelectorAll('#lin-table tr').forEach(row => {
+const target = parseFloat(row.querySelector('.l-target')?.value);
+const r1 = parseFloat(row.querySelector('.l-r1')?.value), r2 = parseFloat(row.querySelector('.l-r2')?.value);
+if(!isNaN(target) && !isNaN(r1) && !isNaN(r2)) data.push({ row, target, mean: (r1+r2)/2 });
+});
+if(data.length < 2) return;
+const n = data.length;
+let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+data.forEach(d => { sumX += d.target; sumY += d.mean; sumXY += d.target * d.mean; sumX2 += d.target * d.target; });
+const denom = (n * sumX2 - sumX * sumX);
+const slope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+const intercept = (sumY - slope * sumX) / n;
+const tea = parseFloat(document.getElementById('lin-tea').value) || 10;
+let maxDev = 0;
+data.forEach(d => {
+const expected = slope * d.target + intercept;
+const dev = Math.abs(d.mean - expected);
+const pdev = d.target !== 0 ? Math.abs((d.mean - expected) / d.target) * 100 : 0;
+const pass = pdev <= tea;
+d.row.querySelector('.l-mean').textContent = d.mean.toFixed(3);
+d.row.querySelector('.l-exp').textContent = expected.toFixed(3);
+d.row.querySelector('.l-dev').textContent = dev.toFixed(3);
+d.row.querySelector('.l-pdev').textContent = pdev.toFixed(2)+'%';
+d.row.querySelector('.l-eval').innerHTML = pass ? '<span class="pass">PASS</span>' : '<span class="fail">FAIL</span>';
+if(pdev > maxDev) maxDev = pdev;
+});
+document.getElementById('lin-maxdev').textContent = maxDev.toFixed(2)+'%';
+document.getElementById('lin-tea-disp').textContent = tea+'%';
+const status = maxDev <= tea ? 'LINEAR' : 'NON-LINEAR';
+document.getElementById('lin-status').innerHTML = `<span class="${status==='LINEAR'?'pass':'fail'}">${status}</span>`;
+const ctx = document.getElementById('linChart').getContext('2d');
+if(chartInstances.lin) chartInstances.lin.destroy();
+chartInstances.lin = new Chart(ctx, { type: 'scatter', data: { datasets: [
+{ label: 'Observed', data: data.map(d => ({ x: d.target, y: d.mean })), backgroundColor: '#000000', pointRadius: 4 },
+{ label: 'Regression', data: [{ x: Math.min(...data.map(d => d.target)), y: slope * Math.min(...data.map(d => d.target)) + intercept }, { x: Math.max(...data.map(d => d.target)), y: slope * Math.max(...data.map(d => d.target)) + intercept }], type: 'line', borderColor: '#000000', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+document.getElementById('lin-results').classList.remove('hidden');
+document.getElementById('lin-recommendation').value = (status === 'LINEAR') ? "CONCLUSION: Method demonstrates linearity.\nRECOMMENDATION: Verified for reported measuring interval." : "CONCLUSION: Method demonstrates non-linearity.\nRECOMMENDATION: Restrict reportable range or investigate matrix issues.";
+}
+const carSequence = [
+{id:'L1', type:'Low', phase:'Baseline'},
+{id:'L2', type:'Low', phase:'Baseline'},
+{id:'L3', type:'Low', phase:'Baseline'},
+{id:'H1', type:'High', phase:'High'},
+{id:'H2', type:'High', phase:'High'},
+{id:'L4', type:'Low', phase:'Post-High'},
+{id:'H3', type:'High', phase:'High'},
+{id:'H4', type:'High', phase:'High'},
+{id:'L5', type:'Low', phase:'Post-High'},
+{id:'L6', type:'Low', phase:'Post-High'},
+{id:'L7', type:'Low', phase:'Post-High'},
+{id:'L8', type:'Low', phase:'Post-High'},
+{id:'H5', type:'High', phase:'High'},
+{id:'H6', type:'High', phase:'High'},
+{id:'L9', type:'Low', phase:'Post-High'},
+{id:'H7', type:'High', phase:'High'},
+{id:'H8', type:'High', phase:'High'},
+{id:'L10', type:'Low', phase:'Post-High'},
+{id:'H9', type:'High', phase:'High'},
+{id:'H10', type:'High', phase:'High'},
+{id:'L11', type:'Low', phase:'Post-High'}
+];
+function addCarryOverRowWithData(id, type, phase, val) {
+const tbody = document.getElementById('car-table');
+const row = tbody.insertRow();
+let displayType = type;
+if(phase === 'Baseline') displayType += ' (Baseline)';
+else if(phase === 'Post-High') displayType += ' (Post-High)';
+row.innerHTML = `
+<td><b>${id}</b></td>
+<td>${displayType}</td>
+<td><input type="number" step="0.01" class="car-res" data-type="${type}" data-phase="${phase}" value="${val}" oninput="autoSave(); updateCarryOverDeviations(); calculateCarryOver()" placeholder="0.00"></td>
+<td class="car-dev">-</td>
+`;
+}
+function initCarryOverTable() {
+const tbody = document.getElementById('car-table');
+tbody.innerHTML = '';
+carSequence.forEach(item => {
+addCarryOverRowWithData(item.id, item.type, item.phase, '');
+});
+updateCarryOverDeviations();
+calculateCarryOver();
+}
+function updateCarryOverDeviations() {
+const lowTarget = parseFloat(document.getElementById('car-low-target').value);
+const highTarget = parseFloat(document.getElementById('car-high-target').value);
+document.querySelectorAll('#car-table tr').forEach(row => {
+const resInput = row.querySelector('.car-res');
+if(!resInput) return;
+const type = resInput.dataset.type;
+const val = parseFloat(resInput.value);
+const target = type === 'Low' ? lowTarget : highTarget;
+const devCell = row.querySelector('.car-dev');
+if(!isNaN(target) && target !== 0 && !isNaN(val)) {
+const dev = Math.abs(val - target);
+devCell.textContent = dev.toFixed(1);
+} else {
+devCell.textContent = '-';
+}
+});
+}
+function calculateCarryOver() {
+const baselineLows = [], postHighLows = [], allHighs = [];
+document.querySelectorAll('#car-table tr').forEach(row => {
+const resInput = row.querySelector('.car-res');
+if(!resInput) return;
+const type = resInput.dataset.type;
+const phase = resInput.dataset.phase;
+const val = parseFloat(resInput.value);
+if(!isNaN(val)) {
+if(type === 'Low' && phase === 'Baseline') baselineLows.push(val);
+else if(type === 'Low' && phase === 'Post-High') postHighLows.push(val);
+else if(type === 'High') allHighs.push(val);
+}
+});
+if(baselineLows.length < 2 || postHighLows.length < 1 || allHighs.length < 1) {
+document.getElementById('car-bl-mean').textContent = '-';
+document.getElementById('car-bl-sd').textContent = '-';
+document.getElementById('car-bl-cv').textContent = '-';
+document.getElementById('car-ph-mean').textContent = '-';
+document.getElementById('car-ph-sd').textContent = '-';
+document.getElementById('car-ph-cv').textContent = '-';
+document.getElementById('car-high-mean').textContent = '-';
+document.getElementById('car-carry').textContent = '-';
+document.getElementById('car-criteria-disp').textContent = '-';
+document.getElementById('car-status').innerHTML = '-';
+document.getElementById('car-results').classList.add('hidden');
+document.getElementById('car-recommendation').value = "CONCLUSION: Insufficient data for carryover evaluation.\nRECOMMENDATION: Enter all sequence results.";
+return;
+}
+const calcStats = (arr) => {
+const mean = arr.reduce((a,b)=>a+b,0)/arr.length;
+const sd = arr.length > 1 ? Math.sqrt(arr.reduce((sq,n)=>sq+Math.pow(n-mean,2),0)/(arr.length-1)) : 0;
+const cv = mean !== 0 ? (sd/Math.abs(mean))*100 : 0;
+return {mean: Math.abs(mean), sd, cv};
+};
+const blStats = calcStats(baselineLows);
+const phStats = calcStats(postHighLows);
+const highMean = Math.abs(allHighs.reduce((a,b)=>a+b,0)/allHighs.length);
+const criteria = parseFloat(document.getElementById('car-criteria').value) || 1.0;
+const denominator = highMean - blStats.mean;
+const carryover = Math.abs(denominator !== 0 ? ((phStats.mean - blStats.mean) / denominator) * 100 : 0);
+const pass = carryover <= criteria;
+document.getElementById('car-bl-mean').textContent = blStats.mean.toFixed(2);
+document.getElementById('car-bl-sd').textContent = blStats.sd.toFixed(2);
+document.getElementById('car-bl-cv').textContent = blStats.cv.toFixed(1) + '%';
+document.getElementById('car-ph-mean').textContent = phStats.mean.toFixed(2);
+document.getElementById('car-ph-sd').textContent = phStats.sd.toFixed(2);
+document.getElementById('car-ph-cv').textContent = phStats.cv.toFixed(1) + '%';
+document.getElementById('car-high-mean').textContent = highMean.toFixed(2);
+document.getElementById('car-carry').textContent = carryover.toFixed(2) + '%';
+document.getElementById('car-criteria-disp').textContent = '≤ ' + criteria.toFixed(1) + '%';
+document.getElementById('car-status').innerHTML = `<span class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>`;
+const analyte = db.currentAnalyte || 'Analyte';
+const instrument = document.getElementById('car-instrument').value || 'Instrument';
+document.getElementById('car-recommendation').value = pass
+? `CONCLUSION: The carryover test for ${analyte} on the ${instrument} analyzer demonstrates acceptable performance.\nThe observed carryover of ${carryover.toFixed(2)}% is within the acceptable limit of ${criteria.toFixed(1)}%. There is no significant evidence of sample-to-sample contamination. The analyzer is suitable for routine clinical use.`
+: `CONCLUSION: The carryover test for ${analyte} on the ${instrument} analyzer FAILED.\nThe observed carryover of ${carryover.toFixed(2)}% exceeds the acceptable limit of ${criteria.toFixed(1)}%. Significant sample-to-sample contamination is detected. Investigate wash cycles or maintenance.`;
+document.getElementById('car-results').classList.remove('hidden');
+}
+
+// --- REFERENCE INTERVALS FUNCTIONS ---
+function addRefIntervalRow() { addRefIntervalRowWithData({id:'', res:''}); }
+function addRefIntervalRowWithData(r) {
+    const tbody = document.getElementById('ri-table');
+    const row = tbody.insertRow();
+    row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" value="${r.id}" oninput="autoSave()"></td><td><input type="number" step="0.01" class="ri-res" value="${r.res}" oninput="autoSave(); calcRefIntervalRow(this)"></td><td class="ri-status">-</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+    if(r.res) calcRefIntervalRow(row.querySelector('.ri-res'));
+}
+
+function calcRefIntervalRow(input) {
+    const row = input.closest('tr');
+    const val = parseFloat(input.value);
+    const lower = parseFloat(document.getElementById('ri-lower').value);
+    const upper = parseFloat(document.getElementById('ri-upper').value);
+    const statusCell = row.querySelector('.ri-status');
+    
+    if(!isNaN(val) && !isNaN(lower) && !isNaN(upper)) {
+        if(val >= lower && val <= upper) {
+            statusCell.innerHTML = '<span class="pass">YES</span>';
+        } else {
+            statusCell.innerHTML = '<span class="fail">NO</span>';
+        }
+    } else {
+        statusCell.textContent = '-';
+    }
+    calculateRefIntervals();
+}
+
+function calculateRefIntervals() {
+    const lower = parseFloat(document.getElementById('ri-lower').value);
+    const upper = parseFloat(document.getElementById('ri-upper').value);
+    const results = [];
+    
+    document.querySelectorAll('#ri-table tr').forEach(row => {
+        const val = parseFloat(row.querySelector('.ri-res')?.value);
+        if(!isNaN(val)) results.push(val);
+    });
+    
+    const total = results.length;
+    let outside = 0;
+    if(!isNaN(lower) && !isNaN(upper)) {
+        results.forEach(v => {
+            if(v < lower || v > upper) outside++;
+        });
+    }
+    
+    const within = total - outside;
+    document.getElementById('ri-total').textContent = total;
+    document.getElementById('ri-within').textContent = within;
+    document.getElementById('ri-outside').textContent = outside;
+    
+    let maxAllowed = Math.floor(total * 0.10);
+    if (total >= 20 && maxAllowed < 2) maxAllowed = 2;
+    const isVerified = total > 0 ? outside <= maxAllowed : false;
+    
+    const statusText = total === 0 ? '-' : (isVerified ? 'VERIFIED' : 'NOT VERIFIED');
+    document.getElementById('ri-status').innerHTML = total === 0 ? '-' : `<span class="${isVerified ? 'pass' : 'fail'}">${statusText}</span>`;
+    
+    document.getElementById('ri-results').classList.toggle('hidden', total === 0);
+    
+    // --- Standard Statistical Method (Parametric & Non-Parametric) ---
+    if (results.length > 1) {
+        const mean = results.reduce((a, b) => a + b, 0) / results.length;
+        const sd = Math.sqrt(results.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (results.length - 1));
+        
+        document.getElementById('ri-mean').textContent = mean.toFixed(3);
+        document.getElementById('ri-sd').textContent = sd.toFixed(3);
+        document.getElementById('ri-param-lower').textContent = (mean - 2 * sd).toFixed(3);
+        document.getElementById('ri-param-upper').textContent = (mean + 2 * sd).toFixed(3);
+        
+        const sorted = [...results].sort((a, b) => a - b);
+        const calcPercentile = (arr, p) => {
+            const index = (p / 100) * arr.length;
+            if (Number.isInteger(index)) {
+                return (arr[index - 1] + arr[index]) / 2;
+            } else {
+                return arr[Math.ceil(index) - 1];
+            }
+        };
+        document.getElementById('ri-np-lower').textContent = calcPercentile(sorted, 2.5).toFixed(3);
+        document.getElementById('ri-np-upper').textContent = calcPercentile(sorted, 97.5).toFixed(3);
+    } else {
+        document.getElementById('ri-mean').textContent = '-';
+        document.getElementById('ri-sd').textContent = '-';
+        document.getElementById('ri-param-lower').textContent = '-';
+        document.getElementById('ri-param-upper').textContent = '-';
+        document.getElementById('ri-np-lower').textContent = '-';
+        document.getElementById('ri-np-upper').textContent = '-';
+    }
+    // --------------------------------------------------------
+
+    const ctx = document.getElementById('riChart').getContext('2d');
+    if(chartInstances.ri) chartInstances.ri.destroy();
+    
+    if(total > 0) {
+        const scatterData = results.map((v, i) => ({ x: i + 1, y: v }));
+        const datasets = [
+            {
+                label: 'Samples',
+                data: scatterData,
+                backgroundColor: '#000000',
+                pointRadius: 4
+            }
+        ];
+        if(!isNaN(upper)) {
+            datasets.push({
+                label: 'Upper Limit',
+                data: [{ x: 0, y: upper }, { x: total + 1, y: upper }],
+                type: 'line',
+                borderColor: '#dc3545',
+                borderDash: [5, 5],
+                pointRadius: 0,
+                borderWidth: 2
+            });
+        }
+        if(!isNaN(lower)) {
+            datasets.push({
+                label: 'Lower Limit',
+                data: [{ x: 0, y: lower }, { x: total + 1, y: lower }],
+                type: 'line',
+                borderColor: '#dc3545',
+                borderDash: [5, 5],
+                pointRadius: 0,
+                borderWidth: 2
+            });
+        }
+        
+        chartInstances.ri = new Chart(ctx, {
+            type: 'scatter',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { boxWidth: 8, font: { size: 9 } } }
+                },
+                scales: {
+                    y: { ticks: { font: { size: 9 } }, title: { display: true, text: 'Result', font: { size: 10 } } },
+                    x: { ticks: { font: { size: 9 } }, title: { display: true, text: 'Sample #', font: { size: 10 } } }
+                }
+            }
+        });
+    }
+    
+    const instrument = document.getElementById('ri-instrument').value || 'the instrument';
+    const specimen = document.getElementById('ri-specimen').value || 'the specimen';
+    
+    if (total === 0) {
+        document.getElementById('ri-recommendation').value = "CONCLUSION: Insufficient data.\nRECOMMENDATION: Enter at least 20 reference samples to verify the interval.";
+    } else {
+        document.getElementById('ri-recommendation').value = isVerified 
+            ? `CONCLUSION: The reference interval (${lower} - ${upper}) for ${specimen} on ${instrument} is VERIFIED.\nRECOMMENDATION: The interval is appropriate for the laboratory's patient population and can be adopted for routine use.`
+            : `CONCLUSION: The reference interval (${lower} - ${upper}) for ${specimen} on ${instrument} is NOT VERIFIED.\nRECOMMENDATION: ${outside} results fell outside the proposed limits. Investigate the reference interval, population selection, or method performance. Establish a new reference interval per CLSI EP28-A3c.`;
+    }
+}
+
+function applyParametricLimits() {
+    const lower = document.getElementById('ri-param-lower').textContent;
+    const upper = document.getElementById('ri-param-upper').textContent;
+    if (lower !== '-' && upper !== '-') {
+        document.getElementById('ri-lower').value = parseFloat(lower).toFixed(3);
+        document.getElementById('ri-upper').value = parseFloat(upper).toFixed(3);
+        calculateRefIntervals();
+        autoSave();
+        alert('Parametric limits (Mean ± 2 SD) have been applied to the Lower and Upper Limit fields.');
+    } else {
+        alert('Not enough data to calculate limits. Please enter at least 2 sample results and click "Force Calculate" first.');
+    }
+}
+
+function exportToExcel() {
+if (typeof XLSX === 'undefined') { alert('Excel library not loaded.'); return; }
+const wb = XLSX.utils.book_new();
+const globalData = [{
+Hospital: db.global.hospital,
+Department: db.global.department,
+Performed: db.global.performed,
+Reviewed: db.global.reviewed,
+Date: db.global.date,
+CurrentAnalyte: db.currentAnalyte
+}];
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(globalData), "Global");
+const analytesData = db.analytes.map(a => ({ Analyte: a, IsCurrent: a === db.currentAnalyte ? "Yes" : "No" }));
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(analytesData), "Analytes");
+db.analytes.forEach(analyte => {
+const data = db.records[analyte] || {};
+const prefix = analyte + "_";
+if (data.precision && data.precision.rows && data.precision.rows.length > 0) {
+const pRows = data.precision.rows.map((r, i) => ({ Run: i+1, Date: r.date, Level1: r.l1, Level2: r.l2, Level3: r.l3 || '' }));
+if(pRows.length > 0) {
+pRows[0].Instrument = data.precision.instrument || '';
+pRows[0].Levels = data.precision.levels || '2';
+pRows[0].Accept_L1 = data.precision.l1 || '';
+pRows[0].Accept_L2 = data.precision.l2 || '';
+pRows[0].Accept_L3 = data.precision.l3 || '';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pRows), prefix + "Precision");
+}
+if (data.qual && data.qual.rows && data.qual.rows.length > 0) {
+const qRows = data.qual.rows.map((r, i) => ({ n: i+1, SampleID: r.id, MethodA: r.a, MethodB: r.b }));
+if(qRows.length > 0) {
+qRows[0].Reference = data.qual.ref || '';
+qRows[0].Test = data.qual.comp || '';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(qRows), prefix + "Qualitative");
+}
+if (data.quant && data.quant.rows && data.quant.rows.length > 0) {
+const quRows = data.quant.rows.map((r, i) => ({ n: i+1, SampleID: r.id, MethodA: r.a, MethodB: r.b }));
+if(quRows.length > 0) {
+quRows[0].TEa = data.quant.tea || '10';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(quRows), prefix + "Quantitative");
+}
+if (data.corr && data.corr.rows && data.corr.rows.length > 0) {
+const cRows = data.corr.rows.map((r, i) => ({ n: i+1, SampleID: r.id, MethodA: r.a, MethodB: r.b }));
+if(cRows.length > 0) {
+cRows[0].Reference = data.corr.ref || '';
+cRows[0].Test = data.corr.comp || '';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cRows), prefix + "Correlation");
+}
+if (data.cutoff) {
+if (data.cutoff.rows1 && data.cutoff.rows1.length > 0) {
+const co1Rows = data.cutoff.rows1.map((r, i) => ({ Rep: i+1, Result: r.res }));
+if(co1Rows.length > 0) {
+co1Rows[0].CutOffValue = data.cutoff.value || '';
+co1Rows[0].Acceptance = data.cutoff.criteria || '95';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(co1Rows), prefix + "Cutoff_Sample1");
+}
+if (data.cutoff.rows2 && data.cutoff.rows2.length > 0) {
+const co2Rows = data.cutoff.rows2.map((r, i) => ({ Rep: i+1, Result: r.res }));
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(co2Rows), prefix + "Cutoff_Sample2");
+}
+}
+if (data.linearity && data.linearity.rows && data.linearity.rows.length > 0) {
+const lRows = data.linearity.rows.map((r, i) => ({ Sample: i+1, Target: r.target, Run1: r.r1, Run2: r.r2 }));
+if(lRows.length > 0) {
+lRows[0].Instrument = data.linearity.instrument || '';
+lRows[0].TEa = data.linearity.tea || '10';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lRows), prefix + "Linearity");
+}
+if (data.carryover && data.carryover.rows && data.carryover.rows.length > 0) {
+const carRows = data.carryover.rows.map(r => ({ Seq: r.id, Type: r.type, Result: r.res }));
+if(carRows.length > 0) {
+carRows[0].Instrument = data.carryover.instrument || '';
+carRows[0].LowTarget = data.carryover.lowTarget || '';
+carRows[0].HighTarget = data.carryover.highTarget || '';
+carRows[0].Criteria = data.carryover.criteria || '1.0';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(carRows), prefix + "Carryover");
+}
+if (data.refIntervals && data.refIntervals.rows && data.refIntervals.rows.length > 0) {
+const riRows = data.refIntervals.rows.map((r, i) => ({ n: i+1, SampleID: r.id, Result: r.res }));
+if(riRows.length > 0) {
+riRows[0].Instrument = data.refIntervals.instrument || '';
+riRows[0].Specimen = data.refIntervals.specimen || '';
+riRows[0].LowerLimit = data.refIntervals.lower || '';
+riRows[0].UpperLimit = data.refIntervals.upper || '';
+}
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(riRows), prefix + "RefIntervals");
+}
+});
+if (wb.SheetNames.length === 0) { alert('No data to export.'); return; }
+XLSX.writeFile(wb, `LabValidation_Complete_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+function importFromExcel(input) {
+const file = input.files[0];
+if (!file || typeof XLSX === 'undefined') return;
+const reader = new FileReader();
+reader.onload = function(e) {
+try {
+const data = new Uint8Array(e.target.result);
+const workbook = XLSX.read(data, { type: 'array' });
+const globalSheet = workbook.Sheets["Global"];
+if (globalSheet) {
+const gData = XLSX.utils.sheet_to_json(globalSheet);
+if (gData.length > 0) {
+const g = gData[0];
+db.global.hospital = g.Hospital || '';
+db.global.department = g.Department || '';
+db.global.performed = g.Performed || '';
+db.global.reviewed = g.Reviewed || '';
+db.global.date = g.Date || '';
+document.getElementById('global-hospital').value = db.global.hospital;
+document.getElementById('global-department').value = db.global.department;
+document.getElementById('global-performed').value = db.global.performed;
+document.getElementById('global-reviewed').value = db.global.reviewed;
+document.getElementById('global-date').value = db.global.date;
+}
+}
+const analytesSheet = workbook.Sheets["Analytes"];
+if (analytesSheet) {
+const aData = XLSX.utils.sheet_to_json(analytesSheet);
+if (aData.length > 0) {
+db.analytes = aData.map(r => r.Analyte).filter(a => a);
+const current = aData.find(r => r.IsCurrent === "Yes");
+db.currentAnalyte = current ? current.Analyte : (db.analytes[0] || 'Hemoglobin');
+}
+} else {
+db.analytes = ['Hemoglobin'];
+db.currentAnalyte = 'Hemoglobin';
+}
+db.analytes.forEach(analyte => {
+if (!db.records[analyte]) db.records[analyte] = {};
+const prefix = analyte + "_";
+const currentData = db.records[analyte];
+const pSheet = workbook.Sheets[prefix + "Precision"];
+if (pSheet) {
+const pData = XLSX.utils.sheet_to_json(pSheet);
+currentData.precision = currentData.precision || {};
+if (pData.length > 0) {
+currentData.precision.instrument = pData[0].Instrument || '';
+currentData.precision.levels = pData[0].Levels || '2';
+currentData.precision.l1 = pData[0].Accept_L1 || '';
+currentData.precision.l2 = pData[0].Accept_L2 || '';
+currentData.precision.l3 = pData[0].Accept_L3 || '';
+}
+currentData.precision.rows = pData.map(r => ({ date: r.Date || '', l1: String(r.Level1 || ''), l2: String(r.Level2 || ''), l3: String(r.Level3 || '') }));
+}
+const qSheet = workbook.Sheets[prefix + "Qualitative"];
+if (qSheet) {
+const qData = XLSX.utils.sheet_to_json(qSheet);
+currentData.qual = currentData.qual || {};
+if (qData.length > 0) {
+currentData.qual.ref = qData[0].Reference || '';
+currentData.qual.comp = qData[0].Test || '';
+currentData.qual.rows = qData.map(r => ({ id: String(r.SampleID || ''), a: r.MethodA || 'REACTIVE', b: r.MethodB || 'REACTIVE' }));
+}
+}
+const quSheet = workbook.Sheets[prefix + "Quantitative"];
+if (quSheet) {
+const quData = XLSX.utils.sheet_to_json(quSheet);
+currentData.quant = currentData.quant || {};
+if (quData.length > 0) {
+currentData.quant.tea = quData[0].TEa || '10';
+currentData.quant.rows = quData.map(r => ({ id: String(r.SampleID || ''), a: String(r.MethodA || ''), b: String(r.MethodB || '') }));
+}
+}
+const cSheet = workbook.Sheets[prefix + "Correlation"];
+if (cSheet) {
+const cData = XLSX.utils.sheet_to_json(cSheet);
+currentData.corr = currentData.corr || {};
+if (cData.length > 0) {
+currentData.corr.ref = cData[0].Reference || '';
+currentData.corr.comp = cData[0].Test || '';
+currentData.corr.rows = cData.map(r => ({ id: String(r.SampleID || ''), a: String(r.MethodA || ''), b: String(r.MethodB || '') }));
+}
+}
+const co1Sheet = workbook.Sheets[prefix + "Cutoff_Sample1"];
+const co2Sheet = workbook.Sheets[prefix + "Cutoff_Sample2"];
+if (co1Sheet || co2Sheet) {
+currentData.cutoff = currentData.cutoff || {};
+if (co1Sheet) {
+const co1Data = XLSX.utils.sheet_to_json(co1Sheet);
+if (co1Data.length > 0) {
+currentData.cutoff.value = co1Data[0].CutOffValue || '';
+currentData.cutoff.criteria = co1Data[0].Acceptance || '95';
+currentData.cutoff.rows1 = co1Data.map(r => ({ res: String(r.Result || '') }));
+}
+}
+if (co2Sheet) {
+const co2Data = XLSX.utils.sheet_to_json(co2Sheet);
+currentData.cutoff.rows2 = co2Data.map(r => ({ res: String(r.Result || '') }));
+}
+}
+const lSheet = workbook.Sheets[prefix + "Linearity"];
+if (lSheet) {
+const lData = XLSX.utils.sheet_to_json(lSheet);
+currentData.linearity = currentData.linearity || {};
+if (lData.length > 0) {
+currentData.linearity.instrument = lData[0].Instrument || '';
+currentData.linearity.tea = lData[0].TEa || '10';
+currentData.linearity.rows = lData.map(r => ({ target: String(r.Target || ''), r1: String(r.Run1 || ''), r2: String(r.Run2 || '') }));
+}
+}
+const carSheet = workbook.Sheets[prefix + "Carryover"];
+if (carSheet) {
+const carData = XLSX.utils.sheet_to_json(carSheet);
+currentData.carryover = currentData.carryover || {};
+if (carData.length > 0) {
+currentData.carryover.instrument = carData[0].Instrument || '';
+currentData.carryover.lowTarget = carData[0].LowTarget || '';
+currentData.carryover.highTarget = carData[0].HighTarget || '';
+currentData.carryover.criteria = carData[0].Criteria || '1.0';
+currentData.carryover.rows = carData.map(r => ({ id: String(r.Seq || ''), type: String(r.Type || '').split(' ')[0], res: String(r.Result || '') }));
+}
+}
+const riSheet = workbook.Sheets[prefix + "RefIntervals"];
+if (riSheet) {
+const riData = XLSX.utils.sheet_to_json(riSheet);
+currentData.refIntervals = currentData.refIntervals || {};
+if (riData.length > 0) {
+currentData.refIntervals.instrument = riData[0].Instrument || '';
+currentData.refIntervals.specimen = riData[0].Specimen || '';
+currentData.refIntervals.lower = riData[0].LowerLimit || '';
+currentData.refIntervals.upper = riData[0].UpperLimit || '';
+currentData.refIntervals.rows = riData.map(r => ({ id: String(r.SampleID || ''), res: String(r.Result || '') }));
+}
+}
+});
+renderAnalyteSelector();
+loadCurrentFromDB();
+autoSave();
+alert('Complete data imported successfully!');
+} catch (err) {
+console.error(err);
+alert('Error importing Excel file. Please ensure it matches the exported format.');
+}
+input.value = '';
+};
+reader.readAsArrayBuffer(file);
+}
+document.addEventListener('DOMContentLoaded', () => {
+loadFromLocalStorage();
+});
+</script>
+</body>
+</html>
