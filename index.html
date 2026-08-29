@@ -8,74 +8,238 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
+/* --- DARK NAVY THEME VARIABLES --- */
+:root {
+    --bg-main: #0a1628;
+    --bg-card: #0f1d32;
+    --bg-darker: #071220;
+    --bg-input: #162038;
+    --red-accent: #e63946;
+    --red-light: #ff4d5a;
+    --green-success: #2ecc71;
+    --blue-info: #3498db;
+    --orange-warning: #f39c12;
+    --text-primary: #ffffff;
+    --text-secondary: #8b9dc3;
+    --border-color: #1a2d4a;
+    --table-header: #162038;
+    --table-row-alt: #0d1a2e;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eaeaea; color: #333; min-height: 100vh; padding: 20px; }
-.container { max-width: 1400px; margin: 0 auto; background: #fff; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #ccc; }
-.header { background: #f8f9fa; color: #333; padding: 20px; text-align: center; border-bottom: 3px solid #dee2e6; }
-.header h1 { font-size: 1.8em; margin-bottom: 5px; color: #212529; }
-.header p { font-size: 0.9em; color: #6c757d; }
-.report-info { background: #fff; padding: 15px 20px; border-bottom: 2px solid #dee2e6; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-.report-info .form-group label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 700; }
-.report-info input, .report-info select { background: #f8f9fa; border: 1px solid #ced4da; color: #212529; font-weight: 600; padding: 6px; font-size: 12px; }
-.analyte-manager { grid-column: 1 / -1; background: #e9ecef; padding: 12px; border-radius: 4px; border: 2px solid #495057; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background: var(--bg-main); 
+    color: var(--text-primary); 
+    min-height: 100vh; 
+    padding: 20px; 
+}
+.container { 
+    max-width: 1400px; 
+    margin: 0 auto; 
+    background: var(--bg-card); 
+    border-radius: 6px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+    overflow: hidden; 
+    border: 1px solid var(--border-color); 
+}
+.header { 
+    background: var(--bg-darker); 
+    color: var(--text-primary); 
+    padding: 20px; 
+    text-align: center; 
+    border-bottom: 3px solid var(--red-accent); 
+}
+.header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--text-primary); }
+.header p { font-size: 0.9em; color: var(--text-secondary); }
+.report-info { 
+    background: var(--bg-card); 
+    padding: 15px 20px; 
+    border-bottom: 2px solid var(--border-color); 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 12px; 
+}
+.report-info .form-group label { 
+    font-size: 10px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+    color: var(--text-secondary); 
+    font-weight: 700; 
+}
+.report-info input, .report-info select { 
+    background: var(--bg-input); 
+    border: 1px solid var(--border-color); 
+    color: var(--text-primary); 
+    font-weight: 600; 
+    padding: 6px; 
+    font-size: 12px; 
+}
+.analyte-manager { 
+    grid-column: 1 / -1; 
+    background: var(--bg-darker); 
+    padding: 12px; 
+    border-radius: 4px; 
+    border: 2px solid var(--red-accent); 
+    display: flex; 
+    gap: 10px; 
+    align-items: flex-end; 
+    flex-wrap: wrap; 
+}
 .analyte-manager .form-group { margin-bottom: 0; flex: 1; min-width: 150px; }
-.analyte-manager select { font-weight: 800; font-size: 14px; border: 2px solid #495057; background: #fff; }
-.nav-tabs { display: flex; background: #e9ecef; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
-.nav-tab { padding: 12px 16px; cursor: pointer; border: none; background: none; font-size: 12px; font-weight: 700; color: #6c757d; transition: all 0.2s; border-right: 1px solid #dee2e6; }
-.nav-tab:hover { background: #dee2e6; color: #212529; }
-.nav-tab.active { color: #fff; background: #495057; border-right: 1px solid #495057; }
+.analyte-manager select { 
+    font-weight: 800; 
+    font-size: 14px; 
+    border: 2px solid var(--red-accent); 
+    background: var(--bg-input); 
+    color: var(--text-primary);
+}
+.nav-tabs { 
+    display: flex; 
+    background: var(--bg-darker); 
+    border-bottom: 2px solid var(--border-color); 
+    flex-wrap: wrap; 
+}
+.nav-tab { 
+    padding: 12px 16px; 
+    cursor: pointer; 
+    border: none; 
+    background: none; 
+    font-size: 12px; 
+    font-weight: 700; 
+    color: var(--text-secondary); 
+    transition: all 0.2s; 
+    border-right: 1px solid var(--border-color); 
+}
+.nav-tab:hover { background: var(--bg-input); color: var(--text-primary); }
+.nav-tab.active { 
+    color: var(--text-primary); 
+    background: var(--red-accent); 
+    border-right: 1px solid var(--red-accent); 
+}
 .content { padding: 20px; }
 .section { display: none; }
 .section.active { display: block; animation: fadeIn 0.3s; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .form-group { margin-bottom: 12px; }
 .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
-label { display: block; margin-bottom: 4px; font-weight: 700; color: #495057; font-size: 11px; text-transform: uppercase; }
-input, select, textarea { width: 100%; padding: 7px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; background: #fff; color: #212529; }
-input:focus, select:focus { outline: none; border-color: #495057; }
-.data-table { width: 100%; border-collapse: collapse; margin: 12px 0; background: #fff; border: 1px solid #dee2e6; font-size: 11px; }
-.data-table th { background: #e9ecef; color: #212529; padding: 8px; text-align: left; font-weight: 700; border: 1px solid #dee2e6; font-size: 10px; text-transform: uppercase; }
-.data-table td { padding: 6px; border: 1px solid #dee2e6; }
-.data-table tr:nth-child(even) { background: #f8f9fa; }
-.data-table input, .data-table select { width: 100%; padding: 4px; border: 1px solid #ced4da; border-radius: 2px; font-size: 11px; }
+label { display: block; margin-bottom: 4px; font-weight: 700; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; }
+input, select, textarea { 
+    width: 100%; 
+    padding: 7px; 
+    border: 1px solid var(--border-color); 
+    border-radius: 3px; 
+    font-size: 12px; 
+    background: var(--bg-input); 
+    color: var(--text-primary); 
+}
+input:focus, select:focus { outline: none; border-color: var(--red-accent); }
+.data-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin: 12px 0; 
+    background: var(--bg-card); 
+    border: 1px solid var(--border-color); 
+    font-size: 11px; 
+}
+.data-table th { 
+    background: var(--table-header); 
+    color: var(--text-primary); 
+    padding: 8px; 
+    text-align: left; 
+    font-weight: 700; 
+    border: 1px solid var(--border-color); 
+    font-size: 10px; 
+    text-transform: uppercase; 
+}
+.data-table td { padding: 6px; border: 1px solid var(--border-color); }
+.data-table tr:nth-child(even) { background: var(--table-row-alt); }
+.data-table input, .data-table select { 
+    width: 100%; 
+    padding: 4px; 
+    border: 1px solid var(--border-color); 
+    border-radius: 2px; 
+    font-size: 11px; 
+    background: var(--bg-main);
+    color: var(--text-primary);
+}
 .btn { padding: 8px 14px; border: none; border-radius: 3px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin: 3px; text-transform: uppercase; }
-.btn-primary { background: #495057; color: #fff; }
-.btn-primary:hover { background: #343a40; }
-.btn-success { background: #fff; color: #212529; border: 1px solid #495057; }
-.btn-success:hover { background: #495057; color: #fff; }
-.btn-secondary { background: #6c757d; color: #fff; }
-.btn-danger { background: #dc3545; color: #fff; }
-.btn-danger:hover { background: #c82333; }
-.btn-info { background: #17a2b8; color: #fff; }
-.btn-info:hover { background: #138496; }
-.btn-report { background: #28a745; color: #fff; border: 1px solid #1e7e34; }
-.btn-report:hover { background: #1e7e34; }
-.results-panel { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 15px; border: 1px solid #dee2e6; border-left: 4px solid #495057; }
+.btn-primary { background: var(--red-accent); color: var(--text-primary); }
+.btn-primary:hover { background: var(--red-light); }
+.btn-success { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--red-accent); }
+.btn-success:hover { background: var(--red-accent); color: var(--text-primary); }
+.btn-secondary { background: var(--border-color); color: var(--text-primary); }
+.btn-danger { background: #c0392b; color: var(--text-primary); }
+.btn-danger:hover { background: #e74c3c; }
+.btn-info { background: var(--blue-info); color: var(--text-primary); }
+.btn-info:hover { background: #2980b9; }
+.btn-report { background: var(--red-accent); color: var(--text-primary); border: 1px solid var(--red-light); }
+.btn-report:hover { background: var(--red-light); }
+.results-panel { 
+    background: var(--bg-darker); 
+    padding: 15px; 
+    border-radius: 4px; 
+    margin-top: 15px; 
+    border: 1px solid var(--border-color); 
+    border-left: 4px solid var(--red-accent); 
+}
 .results-compact-wrapper { display: flex; gap: 15px; margin-top: 12px; align-items: flex-start; }
-.results-chart-box { width: 35%; min-width: 180px; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 8px; }
+.results-chart-box { width: 35%; min-width: 180px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 8px; }
 .results-chart-box canvas { width: 100% !important; height: 180px !important; }
 .results-text-box { width: 65%; display: flex; flex-direction: column; gap: 8px; }
 .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-.result-card { background: #fff; padding: 8px; border-radius: 3px; border: 1px solid #dee2e6; text-align: center; }
-.result-card h4 { color: #6c757d; margin-bottom: 3px; font-size: 9px; text-transform: uppercase; font-weight: 700; }
-.result-value { font-size: 16px; font-weight: 800; color: #212529; }
-.pass { color: #155724; font-weight: bold; background: #d4edda; padding: 2px 6px; border-radius: 3px; display: inline-block; border: 1px solid #c3e6cb; font-size: 10px; }
-.fail { color: #721c24; font-weight: bold; background: #f8d7da; padding: 2px 6px; border-radius: 3px; display: inline-block; border: 1px solid #f5c6cb; font-size: 10px; }
-.info-box { background: #e9ecef; border-left: 3px solid #495057; padding: 12px; margin: 12px 0; border-radius: 0 3px 3px 0; font-size: 11px; line-height: 1.5; color: #495057; }
-.info-box ol { margin-left: 20px; margin-top: 5px; font-size: 11px; line-height: 1.6; color: #495057; }
+.result-card { 
+    background: var(--bg-card); 
+    padding: 8px; 
+    border-radius: 3px; 
+    border: 1px solid var(--border-color); 
+    text-align: center; 
+}
+.result-card h4 { color: var(--text-secondary); margin-bottom: 3px; font-size: 9px; text-transform: uppercase; font-weight: 700; }
+.result-value { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+.pass { color: var(--green-success); font-weight: bold; background: rgba(46, 204, 113, 0.15); padding: 2px 6px; border-radius: 3px; display: inline-block; border: 1px solid rgba(46, 204, 113, 0.3); font-size: 10px; }
+.fail { color: var(--red-light); font-weight: bold; background: rgba(230, 57, 70, 0.15); padding: 2px 6px; border-radius: 3px; display: inline-block; border: 1px solid rgba(230, 57, 70, 0.3); font-size: 10px; }
+.info-box { 
+    background: var(--bg-darker); 
+    border-left: 3px solid var(--red-accent); 
+    padding: 12px; 
+    margin: 12px 0; 
+    border-radius: 0 3px 3px 0; 
+    font-size: 11px; 
+    line-height: 1.5; 
+    color: var(--text-secondary); 
+}
+.info-box ol { margin-left: 20px; margin-top: 5px; font-size: 11px; line-height: 1.6; color: var(--text-secondary); }
 .info-box ol li { margin-bottom: 4px; }
-.info-box strong { color: #212529; }
-.info-box code { background: #dee2e6; padding: 1px 4px; border-radius: 2px; font-family: monospace; font-size: 10px; color: #212529; }
+.info-box strong { color: var(--text-primary); }
+.info-box code { background: var(--bg-input); padding: 1px 4px; border-radius: 2px; font-family: monospace; font-size: 10px; color: var(--text-primary); }
 .hidden { display: none; }
-.recommendation-box { padding: 10px; background: #fff; border: 1px solid #dee2e6; border-radius: 3px; }
-.recommendation-box label { font-size: 10px; color: #6c757d; margin-bottom: 4px; display: block; font-weight: 700; }
-.recommendation-box textarea { height: 60px; resize: vertical; font-size: 11px; font-family: inherit; background: #f8f9fa; border: 1px solid #ced4da; width: 100%; }
-.footer { text-align: center; padding: 12px; color: #6c757d; font-weight: 600; font-size: 10px; border-top: 1px solid #dee2e6; background: #f8f9fa; }
+.recommendation-box { padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 3px; }
+.recommendation-box label { font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block; font-weight: 700; }
+.recommendation-box textarea { 
+    height: 60px; 
+    resize: vertical; 
+    font-size: 11px; 
+    font-family: inherit; 
+    background: var(--bg-input); 
+    border: 1px solid var(--border-color); 
+    width: 100%; 
+    color: var(--text-primary);
+}
+.footer { 
+    text-align: center; 
+    padding: 12px; 
+    color: var(--text-secondary); 
+    font-weight: 600; 
+    font-size: 10px; 
+    border-top: 1px solid var(--border-color); 
+    background: var(--bg-darker); 
+}
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #dee2e6; }
-.section-header h2 { margin: 0; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--border-color); }
+.section-header h2 { margin: 0; color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -83,11 +247,11 @@ input[type="number"] { -moz-appearance: textfield; }
 <div class="header" id="print-header">
 <h1>🔬 LABORATORY VALIDATION SUITE</h1>
 <p>Comprehensive Method Validation & Verification System</p>
-<p style="margin-top: 5px; font-size: 0.8em; font-weight: bold; color: #495057;">Created by: Lab SP.Mohammed al Desoqy</p>
+<p style="margin-top: 5px; font-size: 0.8em; font-weight: bold; color: var(--red-accent);">Created by: Lab SP.Mohammed al Desoqy</p>
 <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
 <button class="btn btn-success" onclick="exportToExcel()"> Export Complete Data to Excel</button>
 <button class="btn btn-primary" onclick="document.getElementById('import-excel-file').click()">📤 Import Complete Data from Excel</button>
-<button class="btn btn-info" onclick="document.getElementById('pdf-merge-input').click()">📄 Merge PDFs</button>
+<button class="btn btn-info" onclick="document.getElementById('pdf-merge-input').click()"> Merge PDFs</button>
 <input type="file" id="pdf-merge-input" accept=".pdf" multiple style="display: none;" onchange="mergePDFs(this)">
 <input type="file" id="import-excel-file" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(this)">
 </div>
@@ -95,7 +259,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <div class="report-info">
 <div class="analyte-manager">
 <div class="form-group">
-<label>🔑 Select Analyte (Primary Key)</label>
+<label> Select Analyte (Primary Key)</label>
 <select id="analyte-selector" onchange="switchAnalyte(this.value)"></select>
 </div>
 <div class="form-group">
@@ -139,7 +303,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>Enter the acceptable %CV limits for each level (based on manufacturer claims or biological variation).</li>
 <li>Click <strong>"Force Calculate"</strong> to evaluate if the calculated %CV is within acceptable limits.</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>Mean = Σx/n</code> | <code>SD = (Σ(x-x̄)²/(n-1))</code> | <code>%CV = (SD/Mean)×100</code>
 </div>
 </div>
@@ -189,7 +353,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>The system will automatically flag any discrepant results in red.</li>
 <li>Click <strong>"Force Calculate"</strong> to determine Sensitivity, Specificity, and overall agreement (target ≥95%).</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>Sensitivity = TP/(TP+FN)×100</code> | <code>Specificity = TN/(TN+FP)×100</code>
 </div>
 </div>
@@ -230,7 +394,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>Define the Total Allowable Error (TEa %) based on CLIA, RiliBÄK, or biological variation guidelines.</li>
 <li>Click <strong>"Force Calculate"</strong> to evaluate %Bias per sample and regression statistics. (Acceptable if ≤25% of samples exceed TEa, or per local policy).</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>%Bias = |(B-A)/A|×100</code> | <code>Regression: y = mx + b</code>
 </div>
 </div>
@@ -270,7 +434,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>Click <strong>"Force Calculate"</strong> to generate the Ordinary Least Squares regression equation (y = mx + b), Correlation Coefficient (r), and R².</li>
 <li>Verify that the correlation coefficient (r) is ≥ 0.95 (or 0.975), the slope is close to 1.0, and the intercept is close to 0.</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>r = |Σ((x-x̄)(y-ȳ)) / √(Σ(x-x)² Σ(y-ȳ)²)|</code>
 </div>
 </div>
@@ -299,7 +463,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <div id="cutoff" class="section">
 <div class="section-header">
 <h2>Cut Off Verification Report</h2>
-<button class="btn btn-report" onclick="generateTabReport('cutoff')">📄 Generate Report for This Tab</button>
+<button class="btn btn-report" onclick="generateTabReport('cutoff')"> Generate Report for This Tab</button>
 </div>
 <div class="info-box">
 <strong>CLSI EP12-A2: Cut Off Verification Report</strong><br>
@@ -319,11 +483,11 @@ input[type="number"] { -moz-appearance: textfield; }
 </div>
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
 <div>
-<h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 4px; font-size: 13px;">Sample 1: ~20% Lower</h3>
+<h3 style="color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 4px; font-size: 13px;">Sample 1: ~20% Lower</h3>
 <table class="data-table"><thead><tr><th>Rep</th><th>Result</th><th>Expected</th><th>Discrepant</th><th>Action</th></tr></thead><tbody id="co-table-1"></tbody></table>
 </div>
 <div>
-<h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 4px; font-size: 13px;">Sample 2: ~20% Higher</h3>
+<h3 style="color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 4px; font-size: 13px;">Sample 2: ~20% Higher</h3>
 <table class="data-table"><thead><tr><th>Rep</th><th>Result</th><th>Expected</th><th>Discrepant</th><th>Action</th></tr></thead><tbody id="co-table-2"></tbody></table>
 </div>
 </div>
@@ -357,7 +521,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>Enter the TEa (%) limit allowed for linearity evaluation.</li>
 <li>Click <strong>"Force Calculate"</strong>. The system will plot the regression line and calculate the % Deviation. The method is linear if the maximum % Deviation is ≤ TEa.</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>Expected = (Slope × Target) + Intercept</code> | <code>%Dev = |(Mean - Exp) / Target| × 100</code>
 </div>
 </div>
@@ -398,7 +562,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>Enter the measured results for each step in the sequence exactly as they appear on the analyzer.</li>
 <li>Click <strong>"Force Calculate"</strong>. The system calculates the carryover percentage. It passes if the calculated carryover is ≤ the accept criteria.</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>Carryover (%) = |(Mean Post-High - Mean Baseline) / (High Mean - Baseline Mean)| × 100</code>
 </div>
 </div>
@@ -448,7 +612,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <li>Click <strong>"Force Calculate"</strong>. The system will determine how many results fall outside the specified interval.</li>
 <li><strong>Acceptance Criteria (Verification):</strong> For 20 samples, if ≤ 2 results (10%) fall outside the interval, the reference interval is verified.</li>
 </ol>
-<div style="margin-top: 8px; border-top: 1px dashed #adb5bd; padding-top: 8px;">
+<div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
 <strong>Formulas:</strong> <code>Parametric: Mean ± 2 SD</code> | <code>Non-Parametric: 2.5th and 97.5th Percentiles</code> | <code>Verification: Outliers ≤ 2 (for n=20)</code>
 </div>
 </div>
@@ -473,7 +637,6 @@ input[type="number"] { -moz-appearance: textfield; }
 <button class="btn btn-primary" onclick="addRefIntervalRow()">+ Add Sample</button>
 <button class="btn btn-success" onclick="calculateRefIntervals()">Force Calculate</button>
 <button class="btn btn-info" onclick="applyParametricLimits()">Apply Parametric Limits (Mean ± 2 SD)</button>
-
 <div id="ri-results" class="results-panel hidden">
 <h3>Evaluation Summary (Verification)</h3>
 <div class="results-grid">
@@ -482,8 +645,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <div class="result-card"><h4>Outside Limits</h4><div class="result-value" id="ri-outside">-</div></div>
 <div class="result-card"><h4>Status</h4><div class="result-value" id="ri-status">-</div></div>
 </div>
-
-<h3 style="margin-top: 20px; border-top: 1px solid #dee2e6; padding-top: 10px;">Reference Interval Calculation Methods</h3>
+<h3 style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 10px;">Reference Interval Calculation Methods</h3>
 <div class="results-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
 <div class="result-card"><h4>Mean</h4><div class="result-value" id="ri-mean">-</div></div>
 <div class="result-card"><h4>Std Dev (SD)</h4><div class="result-value" id="ri-sd">-</div></div>
@@ -495,7 +657,6 @@ input[type="number"] { -moz-appearance: textfield; }
 <div class="info-box" style="margin-top: 10px; font-size: 10px;">
 <strong>Statistical Note:</strong> The <strong>Parametric Method (Mean ± 2 SD)</strong> assumes the data follows a normal (Gaussian) distribution and encompasses ~95% of the population. If the data is heavily skewed or non-normal, the <strong>Non-Parametric Method (2.5th and 97.5th percentiles)</strong> is recommended by CLSI EP28-A3c.
 </div>
-
 <div class="results-compact-wrapper">
 <div class="results-chart-box"><canvas id="riChart"></canvas></div>
 <div class="results-text-box">
@@ -955,13 +1116,11 @@ addCarryOverRowWithData(r.id, r.type, phase, r.res);
 initCarryOverTable();
 }
 updateCarryOverDeviations();
-
 document.getElementById('ri-instrument').value = data.refIntervals?.instrument || '';
 document.getElementById('ri-specimen').value = data.refIntervals?.specimen || '';
 document.getElementById('ri-lower').value = data.refIntervals?.lower || '';
 document.getElementById('ri-upper').value = data.refIntervals?.upper || '';
 data.refIntervals?.rows.forEach(r => addRefIntervalRowWithData(r));
-
 calculatePrecision(); calculateQual(); calculateQuant(); calculateCorr(); calculateCutOff(); calculateLinearity(); calculateCarryOver(); calculateRefIntervals();
 }
 function clearForms() {
@@ -1202,13 +1361,13 @@ const ctx = document.getElementById('precChart').getContext('2d');
 if(chartInstances.prec) chartInstances.prec.destroy();
 const labels = l1 ? l1.vals.map((_, i) => `R${i+1}`) : [];
 const datasets = [
-{ label: 'L1', data: l1 ? l1.vals : [], borderColor: '#000000', pointRadius: 3, tension: 0.1 },
-{ label: 'L2', data: l2 ? l2.vals : [], borderColor: '#666666', pointRadius: 3, tension: 0.1 }
+{ label: 'L1', data: l1 ? l1.vals : [], borderColor: '#3498db', pointRadius: 3, tension: 0.1 },
+{ label: 'L2', data: l2 ? l2.vals : [], borderColor: '#e63946', pointRadius: 3, tension: 0.1 }
 ];
 if(l3 && document.getElementById('prec-levels').value === '3') {
-datasets.push({ label: 'L3', data: l3.vals, borderColor: '#999999', pointRadius: 3, tension: 0.1 });
+datasets.push({ label: 'L3', data: l3.vals, borderColor: '#f39c12', pointRadius: 3, tension: 0.1 });
 }
-chartInstances.prec = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+chartInstances.prec = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ffffff', boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } }, x: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } } } } });
 const allPass = l1Pass && l2Pass && (document.getElementById('prec-levels').value === '2' || l3Pass);
 document.getElementById('prec-recommendation').value = allPass ? "CONCLUSION: Precision within acceptable limits.\nRECOMMENDATION: Verified for routine use." : "CONCLUSION: Precision exceeds limits.\nRECOMMENDATION: Investigate imprecision sources.";
 }
@@ -1240,7 +1399,7 @@ document.getElementById('qual-total').textContent = total;
 document.getElementById('qual-results').classList.remove('hidden');
 const ctx = document.getElementById('qualChart').getContext('2d');
 if(chartInstances.qual) chartInstances.qual.destroy();
-chartInstances.qual = new Chart(ctx, { type: 'bar', data: { labels: ['TP', 'TN', 'FP', 'FN'], datasets: [{ data: [tp, tn, fp, fn], backgroundColor: ['#000000', '#444444', '#888888', '#cccccc'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+chartInstances.qual = new Chart(ctx, { type: 'bar', data: { labels: ['TP', 'TN', 'FP', 'FN'], datasets: [{ data: [tp, tn, fp, fn], backgroundColor: ['#2ecc71', '#3498db', '#e63946', '#f39c12'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } }, x: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } } } } });
 const pass = (((tp/(tp+fn))*100 || 0) >= 95 && ((tn/(tn+fp))*100 || 0) >= 95);
 document.getElementById('qual-recommendation').value = pass ? "CONCLUSION: Agreement meets criteria (≥95%).\nRECOMMENDATION: Verified for routine use." : "CONCLUSION: Agreement below criteria.\nRECOMMENDATION: Review discrepant samples.";
 }
@@ -1290,10 +1449,10 @@ document.getElementById('quant-slope').textContent = Math.abs(slope).toFixed(4);
 const ctx = document.getElementById('quantScatterChart').getContext('2d');
 if(chartInstances.quant) chartInstances.quant.destroy();
 chartInstances.quant = new Chart(ctx, { type: 'scatter', data: { datasets: [
-{ label: 'Samples', data: a.map((x,i)=>({x,y:b[i]})), backgroundColor: '#000000', pointRadius: 3 },
-{ label: 'Regression', data: [{x:Math.min(...a), y:slope*Math.min(...a)+intercept}, {x:Math.max(...a), y:slope*Math.max(...a)+intercept}], type: 'line', borderColor: '#000000', pointRadius: 0, borderWidth: 1 },
-{ label: 'Identity', data: [{x:Math.min(...a), y:Math.min(...a)}, {x:Math.max(...a), y:Math.max(...a)}], type: 'line', borderColor: '#888888', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
-]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+{ label: 'Samples', data: a.map((x,i)=>({x,y:b[i]})), backgroundColor: '#3498db', pointRadius: 3 },
+{ label: 'Regression', data: [{x:Math.min(...a), y:slope*Math.min(...a)+intercept}, {x:Math.max(...a), y:slope*Math.max(...a)+intercept}], type: 'line', borderColor: '#e63946', pointRadius: 0, borderWidth: 1 },
+{ label: 'Identity', data: [{x:Math.min(...a), y:Math.min(...a)}, {x:Math.max(...a), y:Math.max(...a)}], type: 'line', borderColor: '#8b9dc3', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ffffff', boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } }, x: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } } } } });
 }
 const eval = (acc + unacc) > 0 ? ((unacc/(acc+unacc))*100 <= 25 ? 'ACCEPTABLE' : 'UNACCEPTABLE') : 'N/A';
 document.getElementById('quant-recommendation').value = eval === 'ACCEPTABLE' ? "CONCLUSION: Systematic bias within allowable limits.\nRECOMMENDATION: Verified for routine use." : "CONCLUSION: Systematic bias exceeds limits.\nRECOMMENDATION: Investigate calibration/matrix effects.";
@@ -1327,10 +1486,10 @@ document.getElementById('corr-r2').textContent = (r*r).toFixed(4);
 const ctx = document.getElementById('corrChart').getContext('2d');
 if(chartInstances.corr) chartInstances.corr.destroy();
 chartInstances.corr = new Chart(ctx, { type: 'scatter', data: { datasets: [
-{ label: 'Data', data: a.map((x,i)=>({x,y:b[i]})), backgroundColor: '#000000', pointRadius: 3 },
-{ label: 'Regression', data: [{x:Math.min(...a), y:slope*Math.min(...a)+intercept}, {x:Math.max(...a), y:slope*Math.max(...a)+intercept}], type: 'line', borderColor: '#000000', pointRadius: 0, borderWidth: 1 },
-{ label: 'Identity', data: [{x:Math.min(...a), y:Math.min(...a)}, {x:Math.max(...a), y:Math.max(...a)}], type: 'line', borderColor: '#888888', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
-]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+{ label: 'Data', data: a.map((x,i)=>({x,y:b[i]})), backgroundColor: '#3498db', pointRadius: 3 },
+{ label: 'Regression', data: [{x:Math.min(...a), y:slope*Math.min(...a)+intercept}, {x:Math.max(...a), y:slope*Math.max(...a)+intercept}], type: 'line', borderColor: '#e63946', pointRadius: 0, borderWidth: 1 },
+{ label: 'Identity', data: [{x:Math.min(...a), y:Math.min(...a)}, {x:Math.max(...a), y:Math.max(...a)}], type: 'line', borderColor: '#8b9dc3', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ffffff', boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } }, x: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } } } } });
 document.getElementById('corr-results').classList.remove('hidden');
 document.getElementById('corr-recommendation').value = Math.abs(r) >= 0.95 ? "CONCLUSION: Strong correlation observed (r ≥ 0.95).\nRECOMMENDATION: Methods are comparable." : "CONCLUSION: Weak correlation observed.\nRECOMMENDATION: Investigate methodological differences.";
 }
@@ -1407,9 +1566,9 @@ document.getElementById('lin-status').innerHTML = `<span class="${status==='LINE
 const ctx = document.getElementById('linChart').getContext('2d');
 if(chartInstances.lin) chartInstances.lin.destroy();
 chartInstances.lin = new Chart(ctx, { type: 'scatter', data: { datasets: [
-{ label: 'Observed', data: data.map(d => ({ x: d.target, y: d.mean })), backgroundColor: '#000000', pointRadius: 4 },
-{ label: 'Regression', data: [{ x: Math.min(...data.map(d => d.target)), y: slope * Math.min(...data.map(d => d.target)) + intercept }, { x: Math.max(...data.map(d => d.target)), y: slope * Math.max(...data.map(d => d.target)) + intercept }], type: 'line', borderColor: '#000000', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
-]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } } });
+{ label: 'Observed', data: data.map(d => ({ x: d.target, y: d.mean })), backgroundColor: '#3498db', pointRadius: 4 },
+{ label: 'Regression', data: [{ x: Math.min(...data.map(d => d.target)), y: slope * Math.min(...data.map(d => d.target)) + intercept }, { x: Math.max(...data.map(d => d.target)), y: slope * Math.max(...data.map(d => d.target)) + intercept }], type: 'line', borderColor: '#e63946', borderDash: [3,3], pointRadius: 0, borderWidth: 1 }
+]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ffffff', boxWidth: 8, font: { size: 9 } } } }, scales: { y: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } }, x: { ticks: { color: '#8b9dc3', font: { size: 9 } }, grid: { color: '#1a2d4a' } } } } });
 document.getElementById('lin-results').classList.remove('hidden');
 document.getElementById('lin-recommendation').value = (status === 'LINEAR') ? "CONCLUSION: Method demonstrates linearity.\nRECOMMENDATION: Verified for reported measuring interval." : "CONCLUSION: Method demonstrates non-linearity.\nRECOMMENDATION: Restrict reportable range or investigate matrix issues.";
 }
@@ -1535,177 +1694,157 @@ document.getElementById('car-recommendation').value = pass
 : `CONCLUSION: The carryover test for ${analyte} on the ${instrument} analyzer FAILED.\nThe observed carryover of ${carryover.toFixed(2)}% exceeds the acceptable limit of ${criteria.toFixed(1)}%. Significant sample-to-sample contamination is detected. Investigate wash cycles or maintenance.`;
 document.getElementById('car-results').classList.remove('hidden');
 }
-
 // --- REFERENCE INTERVALS FUNCTIONS ---
 function addRefIntervalRow() { addRefIntervalRowWithData({id:'', res:''}); }
 function addRefIntervalRowWithData(r) {
-    const tbody = document.getElementById('ri-table');
-    const row = tbody.insertRow();
-    row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" value="${r.id}" oninput="autoSave()"></td><td><input type="number" step="0.01" class="ri-res" value="${r.res}" oninput="autoSave(); calcRefIntervalRow(this)"></td><td class="ri-status">-</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
-    if(r.res) calcRefIntervalRow(row.querySelector('.ri-res'));
+const tbody = document.getElementById('ri-table');
+const row = tbody.insertRow();
+row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" value="${r.id}" oninput="autoSave()"></td><td><input type="number" step="0.01" class="ri-res" value="${r.res}" oninput="autoSave(); calcRefIntervalRow(this)"></td><td class="ri-status">-</td><td><button class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>`;
+if(r.res) calcRefIntervalRow(row.querySelector('.ri-res'));
 }
-
 function calcRefIntervalRow(input) {
-    const row = input.closest('tr');
-    const val = parseFloat(input.value);
-    const lower = parseFloat(document.getElementById('ri-lower').value);
-    const upper = parseFloat(document.getElementById('ri-upper').value);
-    const statusCell = row.querySelector('.ri-status');
-    
-    if(!isNaN(val) && !isNaN(lower) && !isNaN(upper)) {
-        if(val >= lower && val <= upper) {
-            statusCell.innerHTML = '<span class="pass">YES</span>';
-        } else {
-            statusCell.innerHTML = '<span class="fail">NO</span>';
-        }
-    } else {
-        statusCell.textContent = '-';
-    }
-    calculateRefIntervals();
+const row = input.closest('tr');
+const val = parseFloat(input.value);
+const lower = parseFloat(document.getElementById('ri-lower').value);
+const upper = parseFloat(document.getElementById('ri-upper').value);
+const statusCell = row.querySelector('.ri-status');
+if(!isNaN(val) && !isNaN(lower) && !isNaN(upper)) {
+if(val >= lower && val <= upper) {
+statusCell.innerHTML = '<span class="pass">YES</span>';
+} else {
+statusCell.innerHTML = '<span class="fail">NO</span>';
 }
-
+} else {
+statusCell.textContent = '-';
+}
+calculateRefIntervals();
+}
 function calculateRefIntervals() {
-    const lower = parseFloat(document.getElementById('ri-lower').value);
-    const upper = parseFloat(document.getElementById('ri-upper').value);
-    const results = [];
-    
-    document.querySelectorAll('#ri-table tr').forEach(row => {
-        const val = parseFloat(row.querySelector('.ri-res')?.value);
-        if(!isNaN(val)) results.push(val);
-    });
-    
-    const total = results.length;
-    let outside = 0;
-    if(!isNaN(lower) && !isNaN(upper)) {
-        results.forEach(v => {
-            if(v < lower || v > upper) outside++;
-        });
-    }
-    
-    const within = total - outside;
-    document.getElementById('ri-total').textContent = total;
-    document.getElementById('ri-within').textContent = within;
-    document.getElementById('ri-outside').textContent = outside;
-    
-    let maxAllowed = Math.floor(total * 0.10);
-    if (total >= 20 && maxAllowed < 2) maxAllowed = 2;
-    const isVerified = total > 0 ? outside <= maxAllowed : false;
-    
-    const statusText = total === 0 ? '-' : (isVerified ? 'VERIFIED' : 'NOT VERIFIED');
-    document.getElementById('ri-status').innerHTML = total === 0 ? '-' : `<span class="${isVerified ? 'pass' : 'fail'}">${statusText}</span>`;
-    
-    document.getElementById('ri-results').classList.toggle('hidden', total === 0);
-    
-    // --- Standard Statistical Method (Parametric & Non-Parametric) ---
-    if (results.length > 1) {
-        const mean = results.reduce((a, b) => a + b, 0) / results.length;
-        const sd = Math.sqrt(results.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (results.length - 1));
-        
-        document.getElementById('ri-mean').textContent = mean.toFixed(3);
-        document.getElementById('ri-sd').textContent = sd.toFixed(3);
-        document.getElementById('ri-param-lower').textContent = (mean - 2 * sd).toFixed(3);
-        document.getElementById('ri-param-upper').textContent = (mean + 2 * sd).toFixed(3);
-        
-        const sorted = [...results].sort((a, b) => a - b);
-        const calcPercentile = (arr, p) => {
-            const index = (p / 100) * arr.length;
-            if (Number.isInteger(index)) {
-                return (arr[index - 1] + arr[index]) / 2;
-            } else {
-                return arr[Math.ceil(index) - 1];
-            }
-        };
-        document.getElementById('ri-np-lower').textContent = calcPercentile(sorted, 2.5).toFixed(3);
-        document.getElementById('ri-np-upper').textContent = calcPercentile(sorted, 97.5).toFixed(3);
-    } else {
-        document.getElementById('ri-mean').textContent = '-';
-        document.getElementById('ri-sd').textContent = '-';
-        document.getElementById('ri-param-lower').textContent = '-';
-        document.getElementById('ri-param-upper').textContent = '-';
-        document.getElementById('ri-np-lower').textContent = '-';
-        document.getElementById('ri-np-upper').textContent = '-';
-    }
-    // --------------------------------------------------------
-
-    const ctx = document.getElementById('riChart').getContext('2d');
-    if(chartInstances.ri) chartInstances.ri.destroy();
-    
-    if(total > 0) {
-        const scatterData = results.map((v, i) => ({ x: i + 1, y: v }));
-        const datasets = [
-            {
-                label: 'Samples',
-                data: scatterData,
-                backgroundColor: '#000000',
-                pointRadius: 4
-            }
-        ];
-        if(!isNaN(upper)) {
-            datasets.push({
-                label: 'Upper Limit',
-                data: [{ x: 0, y: upper }, { x: total + 1, y: upper }],
-                type: 'line',
-                borderColor: '#dc3545',
-                borderDash: [5, 5],
-                pointRadius: 0,
-                borderWidth: 2
-            });
-        }
-        if(!isNaN(lower)) {
-            datasets.push({
-                label: 'Lower Limit',
-                data: [{ x: 0, y: lower }, { x: total + 1, y: lower }],
-                type: 'line',
-                borderColor: '#dc3545',
-                borderDash: [5, 5],
-                pointRadius: 0,
-                borderWidth: 2
-            });
-        }
-        
-        chartInstances.ri = new Chart(ctx, {
-            type: 'scatter',
-            data: { datasets: datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { boxWidth: 8, font: { size: 9 } } }
-                },
-                scales: {
-                    y: { ticks: { font: { size: 9 } }, title: { display: true, text: 'Result', font: { size: 10 } } },
-                    x: { ticks: { font: { size: 9 } }, title: { display: true, text: 'Sample #', font: { size: 10 } } }
-                }
-            }
-        });
-    }
-    
-    const instrument = document.getElementById('ri-instrument').value || 'the instrument';
-    const specimen = document.getElementById('ri-specimen').value || 'the specimen';
-    
-    if (total === 0) {
-        document.getElementById('ri-recommendation').value = "CONCLUSION: Insufficient data.\nRECOMMENDATION: Enter at least 20 reference samples to verify the interval.";
-    } else {
-        document.getElementById('ri-recommendation').value = isVerified 
-            ? `CONCLUSION: The reference interval (${lower} - ${upper}) for ${specimen} on ${instrument} is VERIFIED.\nRECOMMENDATION: The interval is appropriate for the laboratory's patient population and can be adopted for routine use.`
-            : `CONCLUSION: The reference interval (${lower} - ${upper}) for ${specimen} on ${instrument} is NOT VERIFIED.\nRECOMMENDATION: ${outside} results fell outside the proposed limits. Investigate the reference interval, population selection, or method performance. Establish a new reference interval per CLSI EP28-A3c.`;
-    }
+const lower = parseFloat(document.getElementById('ri-lower').value);
+const upper = parseFloat(document.getElementById('ri-upper').value);
+const results = [];
+document.querySelectorAll('#ri-table tr').forEach(row => {
+const val = parseFloat(row.querySelector('.ri-res')?.value);
+if(!isNaN(val)) results.push(val);
+});
+const total = results.length;
+let outside = 0;
+if(!isNaN(lower) && !isNaN(upper)) {
+results.forEach(v => {
+if(v < lower || v > upper) outside++;
+});
 }
-
+const within = total - outside;
+document.getElementById('ri-total').textContent = total;
+document.getElementById('ri-within').textContent = within;
+document.getElementById('ri-outside').textContent = outside;
+let maxAllowed = Math.floor(total * 0.10);
+if (total >= 20 && maxAllowed < 2) maxAllowed = 2;
+const isVerified = total > 0 ? outside <= maxAllowed : false;
+const statusText = total === 0 ? '-' : (isVerified ? 'VERIFIED' : 'NOT VERIFIED');
+document.getElementById('ri-status').innerHTML = total === 0 ? '-' : `<span class="${isVerified ? 'pass' : 'fail'}">${statusText}</span>`;
+document.getElementById('ri-results').classList.toggle('hidden', total === 0);
+// --- Standard Statistical Method (Parametric & Non-Parametric) ---
+if (results.length > 1) {
+const mean = results.reduce((a, b) => a + b, 0) / results.length;
+const sd = Math.sqrt(results.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (results.length - 1));
+document.getElementById('ri-mean').textContent = mean.toFixed(3);
+document.getElementById('ri-sd').textContent = sd.toFixed(3);
+document.getElementById('ri-param-lower').textContent = (mean - 2 * sd).toFixed(3);
+document.getElementById('ri-param-upper').textContent = (mean + 2 * sd).toFixed(3);
+const sorted = [...results].sort((a, b) => a - b);
+const calcPercentile = (arr, p) => {
+const index = (p / 100) * arr.length;
+if (Number.isInteger(index)) {
+return (arr[index - 1] + arr[index]) / 2;
+} else {
+return arr[Math.ceil(index) - 1];
+}
+};
+document.getElementById('ri-np-lower').textContent = calcPercentile(sorted, 2.5).toFixed(3);
+document.getElementById('ri-np-upper').textContent = calcPercentile(sorted, 97.5).toFixed(3);
+} else {
+document.getElementById('ri-mean').textContent = '-';
+document.getElementById('ri-sd').textContent = '-';
+document.getElementById('ri-param-lower').textContent = '-';
+document.getElementById('ri-param-upper').textContent = '-';
+document.getElementById('ri-np-lower').textContent = '-';
+document.getElementById('ri-np-upper').textContent = '-';
+}
+// --------------------------------------------------------
+const ctx = document.getElementById('riChart').getContext('2d');
+if(chartInstances.ri) chartInstances.ri.destroy();
+if(total > 0) {
+const scatterData = results.map((v, i) => ({ x: i + 1, y: v }));
+const datasets = [
+{
+label: 'Samples',
+data: scatterData,
+backgroundColor: '#3498db',
+pointRadius: 4
+}
+];
+if(!isNaN(upper)) {
+datasets.push({
+label: 'Upper Limit',
+data: [{ x: 0, y: upper }, { x: total + 1, y: upper }],
+type: 'line',
+borderColor: '#e63946',
+borderDash: [5, 5],
+pointRadius: 0,
+borderWidth: 2
+});
+}
+if(!isNaN(lower)) {
+datasets.push({
+label: 'Lower Limit',
+data: [{ x: 0, y: lower }, { x: total + 1, y: lower }],
+type: 'line',
+borderColor: '#e63946',
+borderDash: [5, 5],
+pointRadius: 0,
+borderWidth: 2
+});
+}
+chartInstances.ri = new Chart(ctx, {
+type: 'scatter',
+data: { datasets: datasets },
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: { labels: { color: '#ffffff', boxWidth: 8, font: { size: 9 } } }
+},
+scales: {
+y: { ticks: { color: '#8b9dc3', font: { size: 9 } }, title: { display: true, text: 'Result', color: '#8b9dc3', font: { size: 10 } }, grid: { color: '#1a2d4a' } },
+x: { ticks: { color: '#8b9dc3', font: { size: 9 } }, title: { display: true, text: 'Sample #', color: '#8b9dc3', font: { size: 10 } }, grid: { color: '#1a2d4a' } }
+}
+}
+});
+}
+const instrument = document.getElementById('ri-instrument').value || 'the instrument';
+const specimen = document.getElementById('ri-specimen').value || 'the specimen';
+if (total === 0) {
+document.getElementById('ri-recommendation').value = "CONCLUSION: Insufficient data.\nRECOMMENDATION: Enter at least 20 reference samples to verify the interval.";
+} else {
+document.getElementById('ri-recommendation').value = isVerified
+? `CONCLUSION: The reference interval (${lower} - ${upper}) for ${specimen} on ${instrument} is VERIFIED.\nRECOMMENDATION: The interval is appropriate for the laboratory's patient population and can be adopted for routine use.`
+: `CONCLUSION: The reference interval (${lower} - ${upper}) for ${specimen} on ${instrument} is NOT VERIFIED.\nRECOMMENDATION: ${outside} results fell outside the proposed limits. Investigate the reference interval, population selection, or method performance. Establish a new reference interval per CLSI EP28-A3c.`;
+}
+}
 function applyParametricLimits() {
-    const lower = document.getElementById('ri-param-lower').textContent;
-    const upper = document.getElementById('ri-param-upper').textContent;
-    if (lower !== '-' && upper !== '-') {
-        document.getElementById('ri-lower').value = parseFloat(lower).toFixed(3);
-        document.getElementById('ri-upper').value = parseFloat(upper).toFixed(3);
-        calculateRefIntervals();
-        autoSave();
-        alert('Parametric limits (Mean ± 2 SD) have been applied to the Lower and Upper Limit fields.');
-    } else {
-        alert('Not enough data to calculate limits. Please enter at least 2 sample results and click "Force Calculate" first.');
-    }
+const lower = document.getElementById('ri-param-lower').textContent;
+const upper = document.getElementById('ri-param-upper').textContent;
+if (lower !== '-' && upper !== '-') {
+document.getElementById('ri-lower').value = parseFloat(lower).toFixed(3);
+document.getElementById('ri-upper').value = parseFloat(upper).toFixed(3);
+calculateRefIntervals();
+autoSave();
+alert('Parametric limits (Mean ± 2 SD) have been applied to the Lower and Upper Limit fields.');
+} else {
+alert('Not enough data to calculate limits. Please enter at least 2 sample results and click "Force Calculate" first.');
 }
-
+}
 function exportToExcel() {
 if (typeof XLSX === 'undefined') { alert('Excel library not loaded.'); return; }
 const wb = XLSX.utils.book_new();
